@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\ChangePasswordRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -57,6 +59,28 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Logged out successfully',
+        ]);
+    }
+
+    public function changePassword(ChangePasswordRequest $request)
+    {
+        $user = $request->user();
+
+        if (! Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'Current password is incorrect',
+            ], 422);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+        // Invalidate all sessions after password change except current session
+        $user->tokens()->delete();
+
+        return response()->json([
+            'message' => 'Password changed successfully',
         ]);
     }
 }
