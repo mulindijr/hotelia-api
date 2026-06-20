@@ -108,4 +108,13 @@ class AuthController extends Controller
             'message' => 'Logged out from all devices'
         ]);
     }
+
+    public function status(Request $request)
+    {
+        return response()->json([
+            'authenticated' => true,
+            'user_id' => $request->user()->id,
+            'roles' => $request->user()->getRoleNames(),
+        ]);
+    }
 }
