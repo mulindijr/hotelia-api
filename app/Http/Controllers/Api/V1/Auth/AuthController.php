@@ -83,4 +83,20 @@ class AuthController extends Controller
             'message' => 'Password changed successfully',
         ]);
     }
+
+    public function refreshToken(Request $request)
+    {
+        $user = $request->user();
+    
+        // revoke current token
+        $request->user()->currentAccessToken()->delete();
+    
+        // issue new token
+        $token = $user->createToken('hotel-pms')->plainTextToken;
+    
+        return response()->json([
+            'message' => 'Token refreshed successfully',
+            'token' => $token,
+        ]);
+    }
 }
