@@ -32,10 +32,13 @@ class AuthController extends Controller
 
         $token = $user->createToken('hotelia-pms')->plainTextToken;
 
+        $user->load('roles');
+
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
-            'user' => $user->load('roles', 'permissions'),
+            'user' => $user,
+            'permissions' => $user->getAllPermissions()->pluck('name'),
         ]);
     }
 
