@@ -19,8 +19,13 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
 
       Route::get('/me', [AuthController::class, 'me']);
+      Route::get('/status', [AuthController::class, 'status']);
 
       Route::post('/logout', [AuthController::class, 'logout']);
+      Route::post('/logout-all', [AuthController::class, 'logoutAll']);
+
+      Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
+      Route::post('/change-password', [AuthController::class, 'changePassword']);
     });
   });
 });
