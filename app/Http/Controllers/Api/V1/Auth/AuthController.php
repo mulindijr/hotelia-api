@@ -9,11 +9,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+use App\Models\LoginHistory;
+use App\Models\FailedLoginAttempt;
+
 class AuthController extends Controller
 {
     public function login(LoginRequest $request)
     {
         if (! Auth::attempt($request->validated())) {
+
+            FailedLoginAttempt::create([
+                'email' => $request->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'attempted_at' => now(),
+            ]);
+
             return response()->json([
                 'message' => 'Invalid credentials',
             ], 401);
@@ -34,6 +45,13 @@ class AuthController extends Controller
 
         $token = $user->createToken('hotelia-pms')->plainTextToken;
 
+        LoginHistory::create([
+            'user_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'logged_in_at' => now(),
+        ]);
+
         $user->load('roles');
 
         return response()->json([
@@ -53,6 +71,13 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        LoginHistory::where('user_id', $request->user()->id)
+            ->whereNull('logged_out_at')
+            ->latest()
+            ->first()?->update([
+                'logged_out_at' => now(),
+            ]);
+
         $request->user()
             ->currentAccessToken()
             ->delete();
@@ -102,6 +127,12 @@ class AuthController extends Controller
 
     public function logoutAll(Request $request)
     {
+        LoginHistory::where('user_id', $request->user()->id)
+            ->whereNull('logged_out_at')
+            ->update([
+                'logged_out_at' => now(),
+            ]);
+
         $request->user()->tokens()->delete();
     
         return response()->json([
