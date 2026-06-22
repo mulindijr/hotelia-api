@@ -3,8 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
+use App\Http\Controllers\Api\V1\Security\SecurityController;
 
 Route::prefix('v1')->group(function () {
+
+  // ==========================================
+  // AUTHENTICATION MODULE (Public & Protected)
+  // ==========================================
 
   Route::prefix('auth')->group(function () {
 
@@ -27,5 +32,19 @@ Route::prefix('v1')->group(function () {
       Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
       Route::post('/change-password', [AuthController::class, 'changePassword']);
     });
+  });
+
+  // ==========================================
+  // SECURITY & AUDIT MODULE (Protected)
+  // ==========================================
+
+  Route::middleware('auth:sanctum')->group(function () {
+
+    // Login history route
+    Route::get('/login-history', [SecurityController::class, 'loginHistory']);
+
+    // Failed login attempts route
+    Route::get('/failed-logins', [SecurityController::class, 'failedLogins'])
+      ->middleware(['permission:view activity logs']);
   });
 });
