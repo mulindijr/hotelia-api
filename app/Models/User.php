@@ -63,4 +63,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(PasswordHistory::class);
     }
+
+    public function isLocked(): bool
+    {
+        return $this->locked_until && now()->lessThan($this->locked_until);
+    }
 }
