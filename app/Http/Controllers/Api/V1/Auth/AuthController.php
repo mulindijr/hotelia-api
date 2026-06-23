@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\ChangePasswordRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Carbon;
 
 use App\Models\LoginHistory;
 use App\Models\FailedLoginAttempt;
@@ -18,6 +19,21 @@ class AuthController extends Controller
 {
     public function login(LoginRequest $request)
     {
+        // Check if user exists
+        $user = \App\Models\User::where('email', $request->email)->first();
+
+        // Check if user is locked
+        if ($user && $user->locked_until && now()->lessThan($user->locked_until)) {
+
+            $remainingMinutes = now()->diffInMinutes($user->locked_until) + 1;
+
+            return response()->json([
+                'message' => "Account is temporarily locked. Try again in {$remainingMinutes} minutes.",
+                'locked_until' => $user->locked_until,
+            ], 423);
+        }
+
+        // Attempt login
         if (! Auth::attempt($request->validated())) {
 
             FailedLoginAttempt::create([
@@ -27,13 +43,34 @@ class AuthController extends Controller
                 'attempted_at' => now(),
             ]);
 
+            if ($user) {
+
+                $user->increment('failed_login_count');
+
+                if ($user->failed_login_count >= 3) {
+
+                    $user->update([
+                        'locked_until' => now()->addMinutes(15),
+                        'failed_login_count' => 0, // Reset the count after locking
+                    ]);
+                }
+            }
+
             return response()->json([
                 'message' => 'Invalid credentials',
             ], 401);
         }
 
+        // Authenticated user operations (safe from locked accounts)
         /** @var \App\Models\User $user */
         $user = Auth::user();
+
+        // Reset counts on successful login
+        $user->update([
+            'failed_login_count' => 0,
+            'locked_until' => null,
+            'last_login_at' => now(),
+        ]);
 
         if (! $user->is_active) {
             Auth::logout();
@@ -41,10 +78,6 @@ class AuthController extends Controller
                 'message' => 'Your account is inactive. Please contact support.',
             ], 403);
         }
-
-        $user->update([
-            'last_login_at' => now(),
-        ]);
 
         $token = $user->createToken('hotelia-pms')->plainTextToken;
 
