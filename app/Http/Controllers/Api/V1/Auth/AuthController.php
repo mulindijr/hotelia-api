@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\LoginHistory;
 use App\Models\FailedLoginAttempt;
 
+use App\Models\PasswordHistory;
+
 class AuthController extends Controller
 {
     public function login(LoginRequest $request)
@@ -34,6 +36,7 @@ class AuthController extends Controller
         $user = Auth::user();
 
         if (! $user->is_active) {
+            Auth::logout();
             return response()->json([
                 'message' => 'Your account is inactive. Please contact support.',
             ], 403);
@@ -91,18 +94,52 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
+        // Validate current password
         if (! Hash::check($request->current_password, $user->password)) {
             return response()->json([
                 'message' => 'Current password is incorrect',
             ], 422);
         }
 
+        // Prevent reuse of the immediate current password
+        if (Hash::check($request->new_password, $user->password)) {
+            return response()->json([
+                'message' => 'New password cannot be the same as the current password',
+            ], 422);
+        }
+
+        // Check against last 5 passwords
+        $history = $user->passwordHistories()
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Prevent reuse of any of the last 5 passwords
+        foreach ($history as $oldPassword) {
+            if (Hash::check($request->new_password, $oldPassword->password_hash)) {
+                return response()->json([
+                    'message' => 'New password cannot be the same as any of your last 5 passwords',
+                ], 422);
+            }
+        }
+
+        // Store the current password in history before changing
+        PasswordHistory::create([
+            'user_id' => $user->id,
+            'password_hash' => $user->password,
+        ]);
+
+        // Update the user's password and record the change time
         $user->update([
             'password' => Hash::make($request->new_password),
+            'password_changed_at' => now(),
         ]);
 
         // Invalidate all sessions after password change except current session
-        $user->tokens()->delete();
+        $currentTokenId = $request->user()->currentAccessToken()->id;
+        $user->tokens()
+            ->where('id', '!=', $currentTokenId)
+            ->delete();
 
         return response()->json([
             'message' => 'Password changed successfully',
@@ -112,13 +149,13 @@ class AuthController extends Controller
     public function refreshToken(Request $request)
     {
         $user = $request->user();
-    
+
         // revoke current token
         $request->user()->currentAccessToken()->delete();
-    
+
         // issue new token
-        $token = $user->createToken('hotel-pms')->plainTextToken;
-    
+        $token = $user->createToken('hotelia-pms')->plainTextToken;
+
         return response()->json([
             'message' => 'Token refreshed successfully',
             'token' => $token,
@@ -134,7 +171,7 @@ class AuthController extends Controller
             ]);
 
         $request->user()->tokens()->delete();
-    
+
         return response()->json([
             'message' => 'Logged out from all devices'
         ]);
