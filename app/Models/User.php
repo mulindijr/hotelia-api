@@ -64,8 +64,18 @@ class User extends Authenticatable
         return $this->hasMany(PasswordHistory::class);
     }
 
+    // Check if the user account is currently locked
     public function isLocked(): bool
     {
         return $this->locked_until && now()->lessThan($this->locked_until);
+    }
+
+    // Unlock the user account
+    public function unlock(): bool
+    {
+        return $this->update([
+            'locked_until' => null,
+            'failed_login_count' => 0,
+        ]);
     }
 }

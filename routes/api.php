@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\Security\SecurityController;
+use App\Http\Controllers\Api\V1\Admin\UserController;
 
 Route::prefix('v1')->group(function () {
 
@@ -46,5 +47,15 @@ Route::prefix('v1')->group(function () {
     // Failed login attempts route
     Route::get('/failed-logins', [SecurityController::class, 'failedLogins'])
       ->middleware(['permission:view activity logs']);
+  });
+
+  // ==========================================
+  // ADMIN MODULE (Protected)
+  // ==========================================
+
+  Route::middleware(['auth:sanctum', 'permission:manage users'])->prefix('admin')->group(function () {
+
+    // Unlock user account route
+    Route::post('/users/{user}/unlock', [UserController::class, 'unlock']);
   });
 });
