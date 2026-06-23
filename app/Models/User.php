@@ -20,6 +20,7 @@ use Spatie\Permission\Traits\HasRoles;
     'password',
     'is_active',
     'last_login_at',
+    'password_changed_at',
 ])]
 #[Hidden([
     'password',
@@ -40,6 +41,7 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
             'is_active' => 'boolean',
             'password' => 'hashed',
+            'password_changed_at' => 'datetime'
         ];
     }
 
