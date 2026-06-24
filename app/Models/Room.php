@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\LogsAuditTrail;
+use Illuminate\Support\Facades\Auth;
 
 class Room extends Model
 {
@@ -41,5 +42,19 @@ class Room extends Model
     public function statusHistory()
     {
         return $this->hasMany(RoomStatusHistory::class);
+    }
+
+    protected static function booted()
+    {
+        static::updating(function ($room) {
+            if ($room->isDirty('status')) {
+                RoomStatusHistory::create([
+                    'room_id' => $room->id,
+                    'old_status' => $room->getOriginal('status'),
+                    'new_status' => $room->status,
+                    'changed_by' => Auth::id(),
+                ]);
+            }
+        });
     }
 }
