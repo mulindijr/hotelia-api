@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\LogsAuditTrail;
+use Illuminate\Support\Facades\Auth;
 
 class Booking extends Model
 {
@@ -63,5 +64,19 @@ class Booking extends Model
     public function services()
     {
         return $this->belongsToMany(Service::class, 'booking_services');
+    }
+
+    protected static function booted()
+    {
+        static::updating(function ($booking) {
+            if ($booking->isDirty('status')) {
+                BookingStatusHistory::create([
+                    'booking_id' => $booking->id,
+                    'old_status' => $booking->getOriginal('status'),
+                    'new_status' => $booking->status,
+                    'changed_by' => Auth::id(),
+                ]);
+            }
+        });
     }
 }
