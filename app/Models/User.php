@@ -13,6 +13,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use App\Traits\LogsAuditTrail;
+use Spatie\Activitylog\Support\LogOptions;
 
 #[Fillable([
     'first_name',
@@ -81,5 +82,19 @@ class User extends Authenticatable
             'locked_until' => null,
             'failed_login_count' => 0,
         ]);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('user')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges()
+            ->dontLogIfAttributesChangedOnly([
+                'last_login_at',
+                'updated_at',
+                'failed_login_count',
+            ]);
     }
 }
