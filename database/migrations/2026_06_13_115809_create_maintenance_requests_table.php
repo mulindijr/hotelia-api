@@ -37,6 +37,8 @@ return new class extends Migration
             ])->default('open');
 
             $table->timestamps();
+
+            $table->softDeletes();
         });
     }
 

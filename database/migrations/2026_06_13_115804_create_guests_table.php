@@ -26,6 +26,8 @@ return new class extends Migration
             $table->string('national_id')->nullable();
 
             $table->timestamps();
+
+            $table->softDeletes();
         });
     }
 

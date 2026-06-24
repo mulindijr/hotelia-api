@@ -33,8 +33,10 @@ return new class extends Migration
                 'failed',
                 'refunded'
             ])->default('pending');
-            
+
             $table->timestamps();
+
+            $table->softDeletes();
         });
     }
 

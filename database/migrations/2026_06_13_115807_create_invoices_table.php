@@ -29,8 +29,10 @@ return new class extends Migration
                 'partial',
                 'paid'
             ])->default('unpaid');
-            
+
             $table->timestamps();
+
+            $table->softDeletes();
         });
     }
 
