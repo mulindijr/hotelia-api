@@ -11,16 +11,17 @@ class AuditController extends Controller
     public function index()
     {
         $logs = QueryBuilder::for(Activity::class)
-            ->with('causer')
-            ->allowedFilters([
+            ->with('causer', 'subject')
+            ->allowedFilters(
                 'log_name',
                 'event',
-                'causer_id'
-            ])
-            ->allowedSorts([
+                'causer_id',
+                'description'
+            )
+            ->allowedSorts(
                 'created_at',
                 'id'
-            ])
+            )
             ->latest()
             ->paginate(10);
 
