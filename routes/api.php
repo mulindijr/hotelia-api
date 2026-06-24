@@ -53,7 +53,7 @@ Route::prefix('v1')->group(function () {
   // ADMIN MODULE (Protected)
   // ==========================================
 
-  Route::middleware(['auth:sanctum', 'permission:manage users'])->prefix('admin')->group(function () {
+  Route::middleware(['auth:sanctum', 'permission:update users'])->prefix('admin')->group(function () {
 
     // Unlock user account route
     Route::post('/users/{user}/unlock', [UserController::class, 'unlock']);
