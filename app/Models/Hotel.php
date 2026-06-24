@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogsAuditTrail;
 
 class Hotel extends Model
 {
+    use LogsAuditTrail;
+    
     protected $fillable = [
         'name',
         'slug',

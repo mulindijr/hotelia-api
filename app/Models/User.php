@@ -12,6 +12,7 @@ use Illuminate\Notifications\Notifiable;
 
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Traits\LogsAuditTrail;
 
 #[Fillable([
     'first_name',
@@ -37,6 +38,7 @@ class User extends Authenticatable
     use HasApiTokens;
     use HasRoles;
     use SoftDeletes;
+    use LogsAuditTrail;
 
     protected function casts(): array
     {
