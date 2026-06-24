@@ -2,12 +2,12 @@
 
 namespace App\Traits;
 
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
+use Spatie\Activitylog\Models\Concerns\HasActivity;
 
 trait LogsAuditTrail
 {
-    use LogsActivity;
+    use HasActivity;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -18,6 +18,6 @@ trait LogsAuditTrail
             ->useLogName($logName)
             ->logFillable()
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
+            ->dontLogEmptyChanges();
     }
 }
