@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\Security\SecurityController;
 use App\Http\Controllers\Api\V1\Admin\UserController;
+use App\Http\Controllers\Api\V1\Admin\AuditController;
 
 Route::prefix('v1')->group(function () {
 
@@ -53,9 +54,17 @@ Route::prefix('v1')->group(function () {
   // ADMIN MODULE (Protected)
   // ==========================================
 
-  Route::middleware(['auth:sanctum', 'permission:update users'])->prefix('admin')->group(function () {
+  Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
 
-    // Unlock user account route
-    Route::post('/users/{user}/unlock', [UserController::class, 'unlock']);
+    // User management routes
+    Route::middleware('permission:update users')->group(function () {
+      Route::post('/users/{user}/unlock', [UserController::class, 'unlock']);
+    });
+
+    // Audit logs route
+    Route::middleware('permission:view activity logs')->group(function () {
+      Route::get('/audit-logs', [AuditController::class, 'index']);
+    });
+
   });
 });
