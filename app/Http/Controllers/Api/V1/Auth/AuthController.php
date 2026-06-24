@@ -25,11 +25,10 @@ class AuthController extends Controller
         // Check if user is locked
         if ($user && $user->locked_until && now()->lessThan($user->locked_until)) {
 
-            $remainingMinutes = now()->diffInMinutes($user->locked_until) + 1;
-
             return response()->json([
-                'message' => "Account is temporarily locked. Try again in {$remainingMinutes} minutes.",
+                'message' => 'Account is temporarily locked.',
                 'locked_until' => $user->locked_until,
+                'seconds_remaining' => now()->diffInSeconds($user->locked_until),
             ], 423);
         }
 
