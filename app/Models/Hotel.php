@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\LogsAuditTrail;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Hotel extends Model
 {
     use LogsAuditTrail;
+    use SoftDeletes;
     
     protected $fillable = [
         'name',
