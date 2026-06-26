@@ -69,6 +69,11 @@ class User extends Authenticatable
         return $this->hasMany(PasswordHistory::class);
     }
 
+    public function hotels()
+    {
+        return $this->belongsToMany(Hotel::class);
+    }
+
     // Check if the user account is currently locked
     public function isLocked(): bool
     {

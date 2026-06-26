@@ -10,7 +10,7 @@ class Hotel extends Model
 {
     use LogsAuditTrail;
     use SoftDeletes;
-    
+
     protected $fillable = [
         'name',
         'slug',
@@ -51,5 +51,10 @@ class Hotel extends Model
     public function services()
     {
         return $this->hasMany(Service::class);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
     }
 }
