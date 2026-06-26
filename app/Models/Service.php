@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\LogsAuditTrail;  
+use App\Traits\LogsAuditTrail;
 
 class Service extends Model
 {
@@ -12,6 +12,7 @@ class Service extends Model
     use LogsAuditTrail;
 
     protected $fillable = [
+        'hotel_id',
         'name',
         'description',
         'price',
@@ -22,6 +23,11 @@ class Service extends Model
         'price' => 'decimal:2',
         'is_active' => 'boolean',
     ];
+
+    public function hotel()
+    {
+        return $this->belongsTo(Hotel::class);
+    }
 
     public function bookings()
     {
