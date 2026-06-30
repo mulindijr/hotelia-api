@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1\Hotels;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class HotelResource extends JsonResource
 {
@@ -30,11 +31,13 @@ class HotelResource extends JsonResource
 
             'description' => $this->description,
 
-            'logo' => $this->logo,
-            'is_active' => $this->is_active,
+            'logo' => $this->logo ? Storage::disk('public')->url($this->logo) : null,
+            'is_active' => (bool) $this->is_active,
 
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
+
+            'settings' => new HotelSettingResource($this->whenLoaded('settings')),
         ];
     }
 }
