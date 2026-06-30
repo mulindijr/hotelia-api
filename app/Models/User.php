@@ -102,4 +102,16 @@ class User extends Authenticatable
                 'failed_login_count',
             ]);
     }
+
+    /**
+     * Determine whether the user belongs to a hotel.
+     */
+    public function belongsToHotel(Hotel|int $hotel): bool
+    {
+        $hotelId = $hotel instanceof Hotel ? $hotel->id: $hotel;
+
+        return $this->hotels()
+            ->whereKey($hotelId)
+            ->exists();
+    }
 }
