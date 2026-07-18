@@ -9,4 +9,5 @@ Route::prefix('v1')
     require base_path('routes/api/security.php');
     require base_path('routes/api/admin.php');
     require base_path('routes/api/hotels.php');
+    require base_path('routes/api/rooms.php');
   });
