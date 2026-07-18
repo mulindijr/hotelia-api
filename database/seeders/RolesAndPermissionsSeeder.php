@@ -154,12 +154,19 @@ class RolesAndPermissionsSeeder extends Seeder
             'view maintenance',
             'manage maintenance',
 
+            'view services',
+            'create services',
+            'update services',
+            'delete services',
+
             'view reports',
         ]);
 
         // Receptionist
         $receptionist->givePermissionTo([
             'view rooms',
+
+            'view services',
 
             'view guests',
             'create guests',
