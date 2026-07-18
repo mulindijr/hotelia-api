@@ -59,4 +59,14 @@ class Hotel extends Model
     {
         return $this->belongsToMany(User::class);
     }
+
+    public function housekeepingTasks()
+    {
+        return $this->hasManyThrough(HousekeepingTask::class, Room::class);
+    }
+
+    public function tasks()
+    {
+        return $this->housekeepingTasks();
+    }
 }
