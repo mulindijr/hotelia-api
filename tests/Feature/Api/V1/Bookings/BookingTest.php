@@ -53,7 +53,7 @@ class BookingTest extends ApiTestCase
         $user = $this->actingAsRole('hotel_manager');
         $hotel = $this->createHotelForUser($user);
 
-        $guest = Guest::factory()->create(['hotel_id' => $hotel->id]);
+        $guest = Guest::factory()->create();
         $roomType = RoomType::factory()->create(['hotel_id' => $hotel->id, 'base_price' => 100.00]);
         $room = Room::factory()->create([
             'hotel_id' => $hotel->id,
@@ -95,7 +95,7 @@ class BookingTest extends ApiTestCase
         $user = $this->actingAsRole('hotel_manager');
         $hotel = $this->createHotelForUser($user);
 
-        $guest = Guest::factory()->create(['hotel_id' => $hotel->id]);
+        $guest = Guest::factory()->create();
         $roomType = RoomType::factory()->create(['hotel_id' => $hotel->id]);
         $room = Room::factory()->create([
             'hotel_id' => $hotel->id,
