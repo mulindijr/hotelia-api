@@ -171,9 +171,9 @@ class NotificationTest extends ApiTestCase
 
         $payload = [
             'room_id' => $room->id,
-            'title' => 'AC Broken',
+            'description' => 'AC Broken',
             'priority' => 'high',
-            'status' => 'pending',
+            'status' => 'open',
         ];
 
         // Trigger store maintenance request
