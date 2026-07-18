@@ -2,6 +2,8 @@
 
 namespace App\Services\Booking;
 
+use App\Constants\BookingStatus;
+use App\Constants\RoomStatus;
 use App\Events\Bookings\BookingCancelled;
 use App\Events\Bookings\BookingCheckedIn;
 use App\Events\Bookings\BookingCheckedOut;
@@ -64,7 +66,7 @@ class BookingService
             'adults' => $data['adults'] ?? 1,
             'children' => $data['children'] ?? 0,
             'total_amount' => $totalAmount,
-            'status' => $data['status'] ?? 'pending',
+            'status' => $data['status'] ?? BookingStatus::PENDING,
             'notes' => $data['notes'] ?? null,
         ]);
 
@@ -138,7 +140,7 @@ class BookingService
      */
     public function cancel(Booking $booking): Booking
     {
-        $booking->update(['status' => 'cancelled']);
+        $booking->update(['status' => BookingStatus::CANCELLED]);
 
         event(new BookingCancelled($booking));
 
@@ -150,11 +152,11 @@ class BookingService
      */
     public function checkIn(Booking $booking): Booking
     {
-        $booking->update(['status' => 'checked_in']);
+        $booking->update(['status' => BookingStatus::CHECKED_IN]);
 
         // Update room status
         foreach ($booking->rooms as $room) {
-            $room->update(['status' => 'occupied']);
+            $room->update(['status' => RoomStatus::OCCUPIED]);
         }
 
         event(new BookingCheckedIn($booking));
@@ -167,11 +169,11 @@ class BookingService
      */
     public function checkOut(Booking $booking): Booking
     {
-        $booking->update(['status' => 'checked_out']);
+        $booking->update(['status' => BookingStatus::CHECKED_OUT]);
 
         // Update room status to cleaning
         foreach ($booking->rooms as $room) {
-            $room->update(['status' => 'cleaning']);
+            $room->update(['status' => RoomStatus::CLEANING]);
         }
 
         event(new BookingCheckedOut($booking));
