@@ -30,7 +30,7 @@ class GuestController extends Controller
         $this->authorize('viewAny', Guest::class);
 
         $guests = QueryBuilder::for(Guest::class)
-            ->allowedFilters([
+            ->allowedFilters(
                 'first_name',
                 'last_name',
                 'email',
@@ -42,8 +42,8 @@ class GuestController extends Controller
                           ->orWhere('email', 'like', "%{$value}%")
                           ->orWhere('phone', 'like', "%{$value}%");
                     });
-                }),
-            ])
+                })
+            )
             ->paginate($request->query('per_page', 15));
 
         return response()->json([
