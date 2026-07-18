@@ -78,7 +78,7 @@ class BookingTest extends ApiTestCase
         // Expected amount: (100 * 2 nights) + (25 * 2 qty) = 250
         $response->assertCreated()
             ->assertJsonPath('success', true)
-            ->assertJsonPath('data.total_amount', 250.00)
+            ->assertJsonPath('data.total_amount', 250)
             ->assertJsonPath('data.status', 'pending');
 
         $this->assertDatabaseHas('bookings', [
