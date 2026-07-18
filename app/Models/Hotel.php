@@ -69,4 +69,9 @@ class Hotel extends Model
     {
         return $this->housekeepingTasks();
     }
+
+    public function maintenanceRequests()
+    {
+        return $this->hasManyThrough(MaintenanceRequest::class, Room::class);
+    }
 }
