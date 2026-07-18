@@ -135,6 +135,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'create room types',
             'update room types',
 
+            'view amenities',
+
             'view rooms',
             'create rooms',
             'update rooms',
