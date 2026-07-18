@@ -24,8 +24,12 @@ class BillingTest extends ApiTestCase
         $user = $this->actingAsRole('hotel_manager');
         $hotel = $this->createHotelForUser($user);
 
-        // Update hotel setting tax rate to 16%
-        $hotel->settings()->update(['tax_rate' => 16.00]);
+        // Create hotel setting with tax rate of 16%
+        $hotel->settings()->create([
+            'tax_rate' => 16.00,
+            'currency' => 'USD',
+            'timezone' => 'UTC',
+        ]);
 
         $guest = Guest::factory()->create();
         $roomType = RoomType::factory()->create(['hotel_id' => $hotel->id, 'base_price' => 100.00]);
@@ -107,7 +111,12 @@ class BillingTest extends ApiTestCase
     {
         $user = $this->actingAsRole('hotel_manager');
         $hotel = $this->createHotelForUser($user);
-        $hotel->settings()->update(['tax_rate' => 0.00]); // 0% tax for simplicity
+        // Create hotel setting with tax rate of 0%
+        $hotel->settings()->create([
+            'tax_rate' => 0.00,
+            'currency' => 'USD',
+            'timezone' => 'UTC',
+        ]);
 
         $guest = Guest::factory()->create();
         $roomType = RoomType::factory()->create(['hotel_id' => $hotel->id, 'base_price' => 100.00]);
