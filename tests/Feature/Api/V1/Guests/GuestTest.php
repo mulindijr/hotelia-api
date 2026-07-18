@@ -128,7 +128,7 @@ class GuestTest extends ApiTestCase
      */
     public function test_user_can_delete_guest(): void
     {
-        $this->actingAsRole('hotel_manager');
+        $this->actingAsRole('super_admin');
 
         $guest = Guest::factory()->create();
 
@@ -140,6 +140,20 @@ class GuestTest extends ApiTestCase
         $this->assertSoftDeleted('guests', [
             'id' => $guest->id,
         ]);
+    }
+
+    /**
+     * Test hotel manager cannot delete a guest.
+     */
+    public function test_hotel_manager_cannot_delete_guest(): void
+    {
+        $this->actingAsRole('hotel_manager');
+
+        $guest = Guest::factory()->create();
+
+        $response = $this->deleteJson(route('guests.destroy', $guest));
+
+        $response->assertStatus(403);
     }
 
     /**
