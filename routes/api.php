@@ -16,4 +16,5 @@ Route::prefix('v1')
     require base_path('routes/api/maintenance.php');
     require base_path('routes/api/bookings.php');
     require base_path('routes/api/notifications.php');
+    require base_path('routes/api/billing.php');
   });
