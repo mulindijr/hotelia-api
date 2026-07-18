@@ -131,6 +131,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'view hotels',
             'update hotels',
 
+            'view users',
+            'create users',
+            'update users',
+            'delete users',
+
             'view room types',
             'create room types',
             'update room types',

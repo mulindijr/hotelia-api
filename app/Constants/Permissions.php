@@ -43,4 +43,9 @@ final class Permissions
     public const DELETE_SERVICES = 'delete services';
 
     public const VIEW_REPORTS = 'view reports';
+
+    public const VIEW_USERS = 'view users';
+    public const CREATE_USERS = 'create users';
+    public const UPDATE_USERS = 'update users';
+    public const DELETE_USERS = 'delete users';
 }
