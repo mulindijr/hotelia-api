@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\V1\Bookings;
 
+use App\Constants\BookingStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -29,7 +30,7 @@ class UpdateBookingRequest extends FormRequest
             'guest_id' => [
                 'sometimes',
                 'integer',
-                Rule::exists('guests', 'id')->where('hotel_id', $hotelId),
+                Rule::exists('guests', 'id'),
             ],
             'check_in_date' => ['sometimes', 'date', 'after_or_equal:today'],
             'check_out_date' => ['sometimes', 'date', 'after:check_in_date'],
@@ -80,7 +81,7 @@ class UpdateBookingRequest extends FormRequest
             }
 
             $conflictingBookings = \App\Models\Booking::where('id', '!=', $bookingId)
-                ->where('status', '!=', 'cancelled')
+                ->where('status', '!=', BookingStatus::CANCELLED)
                 ->whereHas('rooms', function ($query) use ($roomIds) {
                     $query->whereIn('rooms.id', $roomIds);
                 })
