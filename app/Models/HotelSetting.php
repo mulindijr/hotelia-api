@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\LogsAuditTrail;
@@ -8,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HotelSetting extends Model
 {
+    use HasFactory;
     use LogsAuditTrail;
 
     protected $fillable = [
