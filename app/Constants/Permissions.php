@@ -23,6 +23,8 @@ final class Permissions
     public const CREATE_BOOKINGS = 'create bookings';
     public const UPDATE_BOOKINGS = 'update bookings';
     public const CANCEL_BOOKINGS = 'cancel bookings';
+    public const CHECK_IN_GUESTS = 'check in guests';
+    public const CHECK_OUT_GUESTS = 'check out guests';
 
     public const VIEW_GUESTS = 'view guests';
     public const CREATE_GUESTS = 'create guests';
