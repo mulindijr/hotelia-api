@@ -1,0 +1,16 @@
+<?php
+
+namespace App\Events\Rooms;
+
+use App\Models\RoomType;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class RoomTypeCreated
+{
+    use Dispatchable, SerializesModels;
+
+    public function __construct(
+        public RoomType $roomType
+    ) {}
+}
