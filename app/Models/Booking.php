@@ -45,7 +45,7 @@ class Booking extends Model
 
     public function rooms()
     {
-        return $this->belongsToMany(Room::class, 'booking_rooms');
+        return $this->belongsToMany(Room::class, 'booking_rooms')->withPivot('price_per_night')->withTimestamps();
     }
 
     public function payments()
@@ -65,7 +65,7 @@ class Booking extends Model
 
     public function services()
     {
-        return $this->belongsToMany(Service::class, 'booking_services');
+        return $this->belongsToMany(Service::class, 'booking_services')->withPivot(['quantity', 'price'])->withTimestamps();
     }
 
     protected static function booted()
