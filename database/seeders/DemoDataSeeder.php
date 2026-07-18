@@ -77,15 +77,18 @@ class DemoDataSeeder extends Seeder
                 'name' => $hData['name']
             ]);
 
-            // Update automatically created settings to match config
-            $hotel->settings->update([
-                'currency' => $hData['currency'],
-                'timezone' => $hData['timezone'],
-                'booking_prefix' => $hData['prefix'],
-                'invoice_prefix' => $hData['prefix'] . '-INV',
-                'tax_rate' => $hData['tax_rate'],
-                'allow_overbooking' => $hData['type'] === 'luxury',
-            ]);
+            // Update or create settings to match config
+            $hotel->settings()->updateOrCreate(
+                ['hotel_id' => $hotel->id],
+                [
+                    'currency' => $hData['currency'],
+                    'timezone' => $hData['timezone'],
+                    'booking_prefix' => $hData['prefix'],
+                    'invoice_prefix' => $hData['prefix'] . '-INV',
+                    'tax_rate' => $hData['tax_rate'],
+                    'allow_overbooking' => $hData['type'] === 'luxury',
+                ]
+            );
 
             // Create Staff Members for this Hotel
             $staffRoles = [
