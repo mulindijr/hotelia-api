@@ -140,8 +140,9 @@ class HousekeepingTaskTest extends ApiTestCase
 
         $response->assertOk()
             ->assertJsonPath('success', true)
-            ->assertJsonPath('data.status', 'completed')
-            ->assertJsonNotNull('data.completed_at');
+            ->assertJsonPath('data.status', 'completed');
+
+        $this->assertNotNull($response->json('data.completed_at'));
 
         $this->assertDatabaseHas('housekeeping_tasks', [
             'id' => $task->id,
