@@ -14,4 +14,13 @@ Route::middleware(['auth:sanctum'])->prefix('hotels')->group(function () {
   Route::put('/{hotel}', [HotelController::class, 'update'])->middleware('permission:update hotels')->name('hotels.update');
 
   Route::delete('/{hotel}', [HotelController::class, 'destroy'])->middleware('permission:delete hotels')->name('hotels.destroy');
+
+  // Hotel settings nested routes
+  Route::get('/{hotel}/settings', [\App\Http\Controllers\Api\V1\Hotels\HotelSettingController::class, 'show'])
+      ->middleware('permission:view hotels')
+      ->name('hotels.settings.show');
+
+  Route::put('/{hotel}/settings', [\App\Http\Controllers\Api\V1\Hotels\HotelSettingController::class, 'update'])
+      ->middleware('permission:update hotels')
+      ->name('hotels.settings.update');
 });
