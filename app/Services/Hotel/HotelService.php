@@ -58,9 +58,6 @@ class HotelService
   public function delete(Hotel $hotel): void
   {
     DB::transaction(function () use ($hotel) {
-
-      $this->deleteLogo($hotel);
-
       $hotel->delete();
 
       event(new HotelDeleted($hotel));
@@ -87,6 +84,7 @@ class HotelService
     $hotel->settings()->create([
       'currency' => 'KES',
       'timezone' => 'Africa/Nairobi',
+      'language' => 'en',
       'check_in_time' => '14:00',
       'check_out_time' => '11:00',
       'tax_rate' => 16,
