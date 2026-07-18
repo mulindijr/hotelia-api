@@ -25,10 +25,17 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
+            'phone' => fake()->phoneNumber(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'is_active' => true,
+            'last_login_at' => null,
+            'password_changed_at' => null,
+            'locked_until' => null,
+            'failed_login_count' => 0,
             'remember_token' => Str::random(10),
         ];
     }
@@ -40,6 +47,37 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is active.
+     */
+    public function active(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is inactive.
+     */
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is temporarily locked.
+     */
+    public function locked(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'locked_until' => now()->addMinutes(15),
+            'failed_login_count' => 3,
         ]);
     }
 }
