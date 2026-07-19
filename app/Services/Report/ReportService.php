@@ -93,8 +93,8 @@ class ReportService
         $totalRoomRevenue = 0.00;
 
         $bookings = $hotel->bookings()
-            ->where('check_in_date', '<=', Carbon::parse($endDate)->toDateString())
-            ->where('check_out_date', '>=', Carbon::parse($startDate)->toDateString())
+            ->where('check_in_date', '<=', $endDate)
+            ->where('check_out_date', '>=', $startDate)
             ->where('status', '!=', 'cancelled')
             ->with('rooms')
             ->get();
