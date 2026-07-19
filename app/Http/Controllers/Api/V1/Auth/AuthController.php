@@ -168,10 +168,14 @@ class AuthController extends Controller
         ]);
 
         // Invalidate all sessions after password change except current session
-        $currentTokenId = $request->user()->currentAccessToken()->id;
-        $user->tokens()
-            ->where('id', '!=', $currentTokenId)
-            ->delete();
+        $currentTokenId = $request->user()->currentAccessToken()?->id;
+        if ($currentTokenId) {
+            $user->tokens()
+                ->where('id', '!=', $currentTokenId)
+                ->delete();
+        } else {
+            $user->tokens()->delete();
+        }
 
         return response()->json([
             'message' => 'Password changed successfully',
