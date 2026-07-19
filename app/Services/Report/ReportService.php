@@ -93,8 +93,9 @@ class ReportService
         $totalRoomRevenue = 0.00;
 
         $bookings = $hotel->bookings()
-            ->whereBetween('check_in_date', [Carbon::parse($startDate)->toDateString(), Carbon::parse($endDate)->toDateString()])
-            ->whereIn('status', ['confirmed', 'checked_in', 'checked_out'])
+            ->where('check_in_date', '<=', Carbon::parse($endDate)->toDateString())
+            ->where('check_out_date', '>=', Carbon::parse($startDate)->toDateString())
+            ->where('status', '!=', 'cancelled')
             ->with('rooms')
             ->get();
 
