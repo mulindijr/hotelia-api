@@ -28,7 +28,7 @@ class RoomTypeController extends Controller
     {
         $this->authorize('viewAny', [RoomType::class, $hotel]);
 
-        $roomTypes = $hotel->roomTypes()->with('amenities')->get();
+        $roomTypes = $this->roomTypeService->getRoomTypes($hotel);
 
         return response()->json([
             'success' => true,

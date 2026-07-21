@@ -7,10 +7,21 @@ use App\Events\Rooms\RoomTypeUpdated;
 use App\Events\Rooms\RoomTypeDeleted;
 use App\Models\Hotel;
 use App\Models\RoomType;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class RoomTypeService
 {
+    /**
+     * Retrieve room types for a hotel with caching.
+     */
+    public function getRoomTypes(Hotel $hotel)
+    {
+        return Cache::remember("hotel:{$hotel->id}:room_types", 3600, function () use ($hotel) {
+            return $hotel->roomTypes()->with('amenities')->get();
+        });
+    }
+
     /**
      * Create a new room type for a hotel.
      */
@@ -26,6 +37,8 @@ class RoomTypeService
             if (!empty($amenityIds)) {
                 $roomType->amenities()->sync($amenityIds);
             }
+
+            Cache::forget("hotel:{$hotel->id}:room_types");
 
             event(new RoomTypeCreated($roomType));
 
@@ -49,6 +62,8 @@ class RoomTypeService
                 $roomType->amenities()->sync($amenityIds);
             }
 
+            Cache::forget("hotel:{$roomType->hotel_id}:room_types");
+
             event(new RoomTypeUpdated($roomType));
 
             return $roomType->fresh()->load('amenities');
@@ -60,8 +75,12 @@ class RoomTypeService
      */
     public function delete(RoomType $roomType): bool
     {
-        event(new RoomTypeDeleted($roomType));
+        return DB::transaction(function () use ($roomType) {
+            Cache::forget("hotel:{$roomType->hotel_id}:room_types");
 
-        return $roomType->delete();
+            event(new RoomTypeDeleted($roomType));
+
+            return $roomType->delete();
+        });
     }
 }
