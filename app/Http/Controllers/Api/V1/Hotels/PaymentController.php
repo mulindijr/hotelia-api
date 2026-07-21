@@ -26,11 +26,7 @@ class PaymentController extends Controller
      */
     public function index(Hotel $hotel, Booking $booking): JsonResponse
     {
-        if ($booking->hotel_id !== $hotel->id) {
-            abort(404, 'Booking not found in hotel scope.');
-        }
-
-        $this->authorize('view', $booking);
+        $this->authorize('view', [$booking, $hotel]);
 
         $payments = $booking->payments()->latest()->get();
 
@@ -46,11 +42,7 @@ class PaymentController extends Controller
      */
     public function store(StorePaymentRequest $request, Hotel $hotel, Booking $booking): JsonResponse
     {
-        if ($booking->hotel_id !== $hotel->id) {
-            abort(404, 'Booking not found in hotel scope.');
-        }
-
-        $this->authorize('update', $booking);
+        $this->authorize('update', [$booking, $hotel]);
 
         $payment = $this->billingService->logPayment($booking, $request->validated());
 
@@ -66,11 +58,7 @@ class PaymentController extends Controller
      */
     public function updateStatus(UpdatePaymentStatusRequest $request, Hotel $hotel, Booking $booking, Payment $payment): JsonResponse
     {
-        if ($booking->hotel_id !== $hotel->id || $payment->booking_id !== $booking->id) {
-            abort(404, 'Payment log not found in booking/hotel scope.');
-        }
-
-        $this->authorize('update', $booking);
+        $this->authorize('update', [$booking, $hotel]);
 
         $updatedPayment = $this->billingService->updatePaymentStatus($payment, $request->status);
 

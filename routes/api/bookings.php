@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Hotels\BookingController;
 use App\Constants\Permissions;
 
-Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/bookings')->group(function () {
+Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/bookings')->scopeBindings()->group(function () {
     Route::get('/', [BookingController::class, 'index'])->middleware('permission:' . Permissions::VIEW_BOOKINGS)->name('bookings.index');
     Route::post('/', [BookingController::class, 'store'])->middleware('permission:' . Permissions::CREATE_BOOKINGS)->name('bookings.store');
     Route::get('/{booking}', [BookingController::class, 'show'])->middleware('permission:' . Permissions::VIEW_BOOKINGS)->name('bookings.show');

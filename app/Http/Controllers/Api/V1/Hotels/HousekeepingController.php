@@ -26,9 +26,7 @@ class HousekeepingController extends Controller
      */
     public function index(Request $request, Hotel $hotel): JsonResponse
     {
-        if (!$request->user()->belongsToHotel($hotel->id) && !$request->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('viewAny', [HousekeepingTask::class, $hotel]);
 
         // Retrieve rooms ids for this hotel
         $roomIds = $hotel->rooms()->pluck('id');
@@ -47,9 +45,7 @@ class HousekeepingController extends Controller
      */
     public function store(StoreHousekeepingTaskRequest $request, Hotel $hotel): JsonResponse
     {
-        if (!$request->user()->belongsToHotel($hotel->id) && !$request->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('create', [HousekeepingTask::class, $hotel]);
 
         $task = $this->housekeepingService->create($hotel, $request->validated());
 
@@ -65,7 +61,7 @@ class HousekeepingController extends Controller
      */
     public function show(Hotel $hotel, HousekeepingTask $task): JsonResponse
     {
-        $this->authorize('view', $task);
+        $this->authorize('view', [$task, $hotel]);
 
         return response()->json([
             'success' => true,
@@ -79,7 +75,7 @@ class HousekeepingController extends Controller
      */
     public function update(UpdateHousekeepingTaskRequest $request, Hotel $hotel, HousekeepingTask $task): JsonResponse
     {
-        $this->authorize('update', $task);
+        $this->authorize('update', [$task, $hotel]);
 
         $updatedTask = $this->housekeepingService->update($task, $request->validated());
 
@@ -95,7 +91,7 @@ class HousekeepingController extends Controller
      */
     public function destroy(Hotel $hotel, HousekeepingTask $task): JsonResponse
     {
-        $this->authorize('delete', $task);
+        $this->authorize('delete', [$task, $hotel]);
 
         $this->housekeepingService->delete($task);
 

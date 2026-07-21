@@ -19,6 +19,11 @@ final class Permissions
     public const UPDATE_ROOMS = 'update rooms';
     public const DELETE_ROOMS = 'delete rooms';
 
+    public const VIEW_AMENITIES = 'view amenities';
+    public const CREATE_AMENITIES = 'create amenities';
+    public const UPDATE_AMENITIES = 'update amenities';
+    public const DELETE_AMENITIES = 'delete amenities';
+
     public const VIEW_BOOKINGS = 'view bookings';
     public const CREATE_BOOKINGS = 'create bookings';
     public const UPDATE_BOOKINGS = 'update bookings';
@@ -48,4 +53,6 @@ final class Permissions
     public const CREATE_USERS = 'create users';
     public const UPDATE_USERS = 'update users';
     public const DELETE_USERS = 'delete users';
+
+    public const VIEW_ACTIVITY_LOGS = 'view activity logs';
 }

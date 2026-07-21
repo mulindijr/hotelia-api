@@ -26,9 +26,7 @@ class MaintenanceController extends Controller
      */
     public function index(Request $request, Hotel $hotel): JsonResponse
     {
-        if (!$request->user()->belongsToHotel($hotel->id) && !$request->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('viewAny', [MaintenanceRequest::class, $hotel]);
 
         // Retrieve rooms ids for this hotel
         $roomIds = $hotel->rooms()->pluck('id');
@@ -47,9 +45,7 @@ class MaintenanceController extends Controller
      */
     public function store(StoreMaintenanceRequest $request, Hotel $hotel): JsonResponse
     {
-        if (!$request->user()->belongsToHotel($hotel->id) && !$request->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('create', [MaintenanceRequest::class, $hotel]);
 
         $maintenanceRequest = $this->maintenanceService->create($hotel, $request->validated(), $request->user()->id);
 
@@ -65,7 +61,7 @@ class MaintenanceController extends Controller
      */
     public function show(Hotel $hotel, MaintenanceRequest $maintenanceRequest): JsonResponse
     {
-        $this->authorize('view', $maintenanceRequest);
+        $this->authorize('view', [$maintenanceRequest, $hotel]);
 
         return response()->json([
             'success' => true,
@@ -79,7 +75,7 @@ class MaintenanceController extends Controller
      */
     public function update(UpdateMaintenanceRequest $request, Hotel $hotel, MaintenanceRequest $maintenanceRequest): JsonResponse
     {
-        $this->authorize('update', $maintenanceRequest);
+        $this->authorize('update', [$maintenanceRequest, $hotel]);
 
         $updatedRequest = $this->maintenanceService->update($maintenanceRequest, $request->validated());
 
@@ -95,7 +91,7 @@ class MaintenanceController extends Controller
      */
     public function destroy(Hotel $hotel, MaintenanceRequest $maintenanceRequest): JsonResponse
     {
-        $this->authorize('delete', $maintenanceRequest);
+        $this->authorize('delete', [$maintenanceRequest, $hotel]);
 
         $this->maintenanceService->delete($maintenanceRequest);
 

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Hotels\UserController;
 use App\Constants\Permissions;
 
-Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/users')->group(function () {
+Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/users')->scopeBindings()->group(function () {
     Route::get('/', [UserController::class, 'index'])->middleware('permission:' . Permissions::VIEW_USERS)->name('hotels.users.index');
     Route::post('/', [UserController::class, 'store'])->middleware('permission:' . Permissions::CREATE_USERS)->name('hotels.users.store');
     Route::get('/{user}', [UserController::class, 'show'])->middleware('permission:' . Permissions::VIEW_USERS)->name('hotels.users.show');

@@ -23,11 +23,7 @@ class InvoiceController extends Controller
      */
     public function show(Hotel $hotel, Booking $booking): JsonResponse
     {
-        if ($booking->hotel_id !== $hotel->id) {
-            abort(404, 'Booking not found in hotel scope.');
-        }
-
-        $this->authorize('view', $booking);
+        $this->authorize('view', [$booking, $hotel]);
 
         $invoice = $this->billingService->getOrGenerateInvoice($booking);
 
@@ -43,11 +39,7 @@ class InvoiceController extends Controller
      */
     public function regenerate(Hotel $hotel, Booking $booking): JsonResponse
     {
-        if ($booking->hotel_id !== $hotel->id) {
-            abort(404, 'Booking not found in hotel scope.');
-        }
-
-        $this->authorize('update', $booking);
+        $this->authorize('update', [$booking, $hotel]);
 
         $invoice = $this->billingService->regenerateInvoice($booking);
 

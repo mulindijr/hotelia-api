@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Hotels\InvoiceController;
 use App\Http\Controllers\Api\V1\Hotels\PaymentController;
 
-Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/bookings/{booking}')->group(function () {
+Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/bookings/{booking}')->scopeBindings()->group(function () {
     Route::get('/invoice', [InvoiceController::class, 'show'])->name('bookings.invoice.show');
     Route::post('/invoice/regenerate', [InvoiceController::class, 'regenerate'])->name('bookings.invoice.regenerate');
     Route::get('/payments', [PaymentController::class, 'index'])->name('bookings.payments.index');

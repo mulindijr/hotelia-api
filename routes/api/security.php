@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Security\SecurityController;
+use App\Constants\Permissions;
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -10,5 +11,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
   // Failed login attempts route
   Route::get('/failed-logins', [SecurityController::class, 'failedLogins'])
-    ->middleware(['permission:view activity logs'])->name('security.failed-logins');
+    ->middleware(['permission:' . Permissions::VIEW_ACTIVITY_LOGS])->name('security.failed-logins');
 });

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Hotels\ServiceController;
 use App\Constants\Permissions;
 
-Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/services')->group(function () {
+Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/services')->scopeBindings()->group(function () {
     Route::get('/', [ServiceController::class, 'index'])->middleware('permission:' . Permissions::VIEW_SERVICES)->name('services.index');
     Route::post('/', [ServiceController::class, 'store'])->middleware('permission:' . Permissions::CREATE_SERVICES)->name('services.store');
     Route::get('/{service}', [ServiceController::class, 'show'])->middleware('permission:' . Permissions::VIEW_SERVICES)->name('services.show');

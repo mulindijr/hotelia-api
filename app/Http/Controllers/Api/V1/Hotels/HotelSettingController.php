@@ -30,7 +30,7 @@ class HotelSettingController extends Controller
             'language' => 'en',
         ]);
 
-        $this->authorize('view', $setting);
+        $this->authorize('view', [$setting, $hotel]);
 
         return response()->json([
             'success' => true,
@@ -51,7 +51,7 @@ class HotelSettingController extends Controller
             'language' => 'en',
         ]);
 
-        $this->authorize('update', $setting);
+        $this->authorize('update', [$setting, $hotel]);
 
         $updatedSetting = $this->hotelSettingService->update($setting, $request->validated());
 

@@ -25,9 +25,7 @@ class UserController extends Controller
      */
     public function index(Hotel $hotel): JsonResponse
     {
-        if (!request()->user()->belongsToHotel($hotel->id) && !request()->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('view', $hotel);
 
         $users = $hotel->users()->with('roles')->paginate(15);
 
@@ -43,9 +41,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request, Hotel $hotel): JsonResponse
     {
-        if (!$request->user()->belongsToHotel($hotel->id) && !$request->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('update', $hotel);
 
         $user = $this->userService->createStaff($hotel, $request->validated());
 
@@ -61,14 +57,6 @@ class UserController extends Controller
      */
     public function show(Hotel $hotel, User $user): JsonResponse
     {
-        if (!request()->user()->belongsToHotel($hotel->id) && !request()->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
-
-        if (!$user->belongsToHotel($hotel->id)) {
-            abort(404, 'User not found in hotel scope.');
-        }
-
         $this->authorize('view', $user);
 
         return response()->json([
@@ -83,14 +71,6 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, Hotel $hotel, User $user): JsonResponse
     {
-        if (!$request->user()->belongsToHotel($hotel->id) && !$request->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
-
-        if (!$user->belongsToHotel($hotel->id)) {
-            abort(404, 'User not found in hotel scope.');
-        }
-
         $this->authorize('update', $user);
 
         $updatedUser = $this->userService->updateStaff($user, $request->validated());
@@ -107,14 +87,6 @@ class UserController extends Controller
      */
     public function destroy(Hotel $hotel, User $user): JsonResponse
     {
-        if (!request()->user()->belongsToHotel($hotel->id) && !request()->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
-
-        if (!$user->belongsToHotel($hotel->id)) {
-            abort(404, 'User not found in hotel scope.');
-        }
-
         $this->authorize('delete', $user);
 
         $this->userService->deleteStaff($hotel, $user);

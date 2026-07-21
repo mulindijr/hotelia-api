@@ -26,9 +26,7 @@ class ServiceController extends Controller
      */
     public function index(Request $request, Hotel $hotel): JsonResponse
     {
-        if (!$request->user()->belongsToHotel($hotel->id) && !$request->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('viewAny', [Service::class, $hotel]);
 
         $services = $hotel->services;
 
@@ -44,9 +42,7 @@ class ServiceController extends Controller
      */
     public function store(StoreServiceRequest $request, Hotel $hotel): JsonResponse
     {
-        if (!$request->user()->belongsToHotel($hotel->id) && !$request->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('create', [Service::class, $hotel]);
 
         $service = $this->ancillaryService->create($hotel, $request->validated());
 
@@ -62,7 +58,7 @@ class ServiceController extends Controller
      */
     public function show(Hotel $hotel, Service $service): JsonResponse
     {
-        $this->authorize('view', $service);
+        $this->authorize('view', [$service, $hotel]);
 
         return response()->json([
             'success' => true,
@@ -76,7 +72,7 @@ class ServiceController extends Controller
      */
     public function update(UpdateServiceRequest $request, Hotel $hotel, Service $service): JsonResponse
     {
-        $this->authorize('update', $service);
+        $this->authorize('update', [$service, $hotel]);
 
         $updatedService = $this->ancillaryService->update($service, $request->validated());
 
@@ -92,7 +88,7 @@ class ServiceController extends Controller
      */
     public function destroy(Hotel $hotel, Service $service): JsonResponse
     {
-        $this->authorize('delete', $service);
+        $this->authorize('delete', [$service, $hotel]);
 
         $this->ancillaryService->delete($service);
 

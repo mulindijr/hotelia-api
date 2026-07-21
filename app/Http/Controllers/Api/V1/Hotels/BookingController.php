@@ -26,9 +26,7 @@ class BookingController extends Controller
      */
     public function index(Request $request, Hotel $hotel): JsonResponse
     {
-        if (!$request->user()->belongsToHotel($hotel->id) && !$request->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('viewAny', [Booking::class, $hotel]);
 
         $bookings = $hotel->bookings()->with(['guest', 'rooms.roomType', 'services'])->get();
 
@@ -44,9 +42,7 @@ class BookingController extends Controller
      */
     public function store(StoreBookingRequest $request, Hotel $hotel): JsonResponse
     {
-        if (!$request->user()->belongsToHotel($hotel->id) && !$request->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('create', [Booking::class, $hotel]);
 
         $booking = $this->bookingService->create($hotel, $request->validated());
 
@@ -62,7 +58,7 @@ class BookingController extends Controller
      */
     public function show(Hotel $hotel, Booking $booking): JsonResponse
     {
-        $this->authorize('view', $booking);
+        $this->authorize('view', [$booking, $hotel]);
 
         return response()->json([
             'success' => true,
@@ -76,7 +72,7 @@ class BookingController extends Controller
      */
     public function update(UpdateBookingRequest $request, Hotel $hotel, Booking $booking): JsonResponse
     {
-        $this->authorize('update', $booking);
+        $this->authorize('update', [$booking, $hotel]);
 
         $updatedBooking = $this->bookingService->update($booking, $request->validated());
 
@@ -92,7 +88,7 @@ class BookingController extends Controller
      */
     public function cancel(Hotel $hotel, Booking $booking): JsonResponse
     {
-        $this->authorize('cancel', $booking);
+        $this->authorize('cancel', [$booking, $hotel]);
 
         $cancelledBooking = $this->bookingService->cancel($booking);
 
@@ -108,7 +104,7 @@ class BookingController extends Controller
      */
     public function checkIn(Hotel $hotel, Booking $booking): JsonResponse
     {
-        $this->authorize('checkIn', $booking);
+        $this->authorize('checkIn', [$booking, $hotel]);
 
         $checkedInBooking = $this->bookingService->checkIn($booking);
 
@@ -124,7 +120,7 @@ class BookingController extends Controller
      */
     public function checkOut(Hotel $hotel, Booking $booking): JsonResponse
     {
-        $this->authorize('checkOut', $booking);
+        $this->authorize('checkOut', [$booking, $hotel]);
 
         $checkedOutBooking = $this->bookingService->checkOut($booking);
 

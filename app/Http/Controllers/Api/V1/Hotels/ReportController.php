@@ -22,9 +22,7 @@ class ReportController extends Controller
      */
     public function dashboard(Hotel $hotel): JsonResponse
     {
-        if (!request()->user()->belongsToHotel($hotel->id) && !request()->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('view', $hotel);
 
         $stats = $this->reportService->getDashboardStats($hotel);
 
@@ -40,9 +38,7 @@ class ReportController extends Controller
      */
     public function revenue(Request $request, Hotel $hotel): JsonResponse
     {
-        if (!request()->user()->belongsToHotel($hotel->id) && !request()->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('view', $hotel);
 
         $request->validate([
             'start_date' => ['sometimes', 'date', 'date_format:Y-m-d'],
