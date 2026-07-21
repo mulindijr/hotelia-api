@@ -2,11 +2,13 @@
 
 namespace App\Services\Housekeeping;
 
+use App\Constants\RoomStatus;
 use App\Events\Housekeeping\HousekeepingTaskCreated;
 use App\Events\Housekeeping\HousekeepingTaskUpdated;
 use App\Events\Housekeeping\HousekeepingTaskDeleted;
 use App\Models\Hotel;
 use App\Models\HousekeepingTask;
+use App\Models\MaintenanceRequest;
 use Illuminate\Support\Facades\DB;
 
 class HousekeepingService
@@ -33,12 +35,36 @@ class HousekeepingService
     public function update(HousekeepingTask $task, array $data): HousekeepingTask
     {
         return DB::transaction(function () use ($task, $data) {
-            // If status changes to completed, set completed_at to now
-            if (isset($data['status']) && $data['status'] === 'completed' && $task->status !== 'completed') {
+            $isBecomingCompleted = isset($data['status']) && $data['status'] === 'completed' && $task->status !== 'completed';
+
+            if ($isBecomingCompleted) {
                 $data['completed_at'] = $data['completed_at'] ?? now();
             }
 
             $task->update($data);
+
+            if ($isBecomingCompleted && $task->room) {
+                $room = $task->room;
+
+                // Check for active maintenance requests
+                $hasActiveMaintenance = MaintenanceRequest::where('room_id', $room->id)
+                    ->whereIn('status', ['open', 'in_progress'])
+                    ->exists();
+
+                if ($hasActiveMaintenance) {
+                    $room->update(['status' => RoomStatus::MAINTENANCE]);
+                } else {
+                    // Check for remaining pending/in_progress housekeeping tasks
+                    $hasPendingTasks = HousekeepingTask::where('room_id', $room->id)
+                        ->where('id', '!=', $task->id)
+                        ->whereIn('status', ['pending', 'in_progress'])
+                        ->exists();
+
+                    if (!$hasPendingTasks) {
+                        $room->update(['status' => RoomStatus::AVAILABLE]);
+                    }
+                }
+            }
 
             event(new HousekeepingTaskUpdated($task));
 
