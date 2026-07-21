@@ -12,8 +12,7 @@ Route::middleware(['auth:sanctum'])->prefix('hotels')->group(function () {
 
   Route::get('/{hotel}', [HotelController::class, 'show'])->middleware('permission:' . Permissions::VIEW_HOTELS)->name('hotels.show');
 
-  Route::put('/{hotel}', [HotelController::class, 'update'])->middleware('permission:' . Permissions::UPDATE_HOTELS)->name('hotels.update');
-  Route::patch('/{hotel}', [HotelController::class, 'update'])->middleware('permission:' . Permissions::UPDATE_HOTELS)->name('hotels.update');
+  Route::match(['put', 'patch'], '/{hotel}', [HotelController::class, 'update'])->middleware('permission:' . Permissions::UPDATE_HOTELS)->name('hotels.update');
 
   Route::delete('/{hotel}', [HotelController::class, 'destroy'])->middleware('permission:' . Permissions::DELETE_HOTELS)->name('hotels.destroy');
 
@@ -22,7 +21,7 @@ Route::middleware(['auth:sanctum'])->prefix('hotels')->group(function () {
       ->middleware('permission:' . Permissions::VIEW_HOTELS)
       ->name('hotels.settings.show');
 
-  Route::put('/{hotel}/settings', [\App\Http\Controllers\Api\V1\Hotels\HotelSettingController::class, 'update'])
+  Route::match(['put', 'patch'], '/{hotel}/settings', [\App\Http\Controllers\Api\V1\Hotels\HotelSettingController::class, 'update'])
       ->middleware('permission:' . Permissions::UPDATE_HOTELS)
       ->name('hotels.settings.update');
 });
