@@ -23,10 +23,16 @@ class CheckoutHousekeepingLifecycleTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
+    }
+
     public function test_checkout_auto_creates_pending_housekeeping_task(): void
     {
         $hotel = Hotel::factory()->create();
-        $guest = Guest::factory()->create(['hotel_id' => $hotel->id]);
+        $guest = Guest::factory()->create();
         $roomType = RoomType::factory()->create(['hotel_id' => $hotel->id]);
         $room = Room::factory()->create(['hotel_id' => $hotel->id, 'room_type_id' => $roomType->id, 'status' => RoomStatus::OCCUPIED]);
 
@@ -81,7 +87,7 @@ class CheckoutHousekeepingLifecycleTest extends TestCase
         // Active maintenance request on room
         MaintenanceRequest::create([
             'room_id' => $room->id,
-            'issue_description' => 'Leaking faucet',
+            'description' => 'Leaking faucet',
             'status' => 'in_progress',
             'priority' => 'high',
         ]);
