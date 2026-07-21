@@ -13,6 +13,12 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * @OA\Tag(
+ *     name="Maintenance",
+ *     description="Room maintenance requests and issue tracking operations"
+ * )
+ */
 class MaintenanceController extends Controller
 {
     use AuthorizesRequests;
@@ -22,7 +28,15 @@ class MaintenanceController extends Controller
     ) {}
 
     /**
-     * Display a listing of maintenance requests for a hotel.
+     * @OA\Get(
+     *     path="/api/v1/hotels/{hotel}/maintenance",
+     *     summary="List all maintenance requests for a hotel",
+     *     tags={"Maintenance"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Maintenance requests list retrieved"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
     public function index(Request $request, Hotel $hotel): JsonResponse
     {
@@ -41,7 +55,24 @@ class MaintenanceController extends Controller
     }
 
     /**
-     * Store a newly created maintenance request.
+     * @OA\Post(
+     *     path="/api/v1/hotels/{hotel}/maintenance",
+     *     summary="Create a new maintenance request",
+     *     tags={"Maintenance"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"room_id", "description"},
+     *             @OA\Property(property="room_id", type="integer", example=1),
+     *             @OA\Property(property="description", type="string", example="Leaking showerhead"),
+     *             @OA\Property(property="priority", type="string", enum={"low", "medium", "high", "critical"}, example="medium")
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Maintenance request created successfully"),
+     *     @OA\Response(response=422, description="Validation failed")
+     * )
      */
     public function store(StoreMaintenanceRequest $request, Hotel $hotel): JsonResponse
     {
@@ -57,7 +88,16 @@ class MaintenanceController extends Controller
     }
 
     /**
-     * Display the specified maintenance request.
+     * @OA\Get(
+     *     path="/api/v1/hotels/{hotel}/maintenance/{maintenanceRequest}",
+     *     summary="Get maintenance request details",
+     *     tags={"Maintenance"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="maintenanceRequest", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Maintenance request details retrieved"),
+     *     @OA\Response(response=404, description="Maintenance request not found")
+     * )
      */
     public function show(Hotel $hotel, MaintenanceRequest $maintenanceRequest): JsonResponse
     {
@@ -71,7 +111,16 @@ class MaintenanceController extends Controller
     }
 
     /**
-     * Update the specified maintenance request.
+     * @OA\Put(
+     *     path="/api/v1/hotels/{hotel}/maintenance/{maintenanceRequest}",
+     *     summary="Update maintenance request status or details",
+     *     tags={"Maintenance"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="maintenanceRequest", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Maintenance request updated successfully"),
+     *     @OA\Response(response=422, description="Validation failed")
+     * )
      */
     public function update(UpdateMaintenanceRequest $request, Hotel $hotel, MaintenanceRequest $maintenanceRequest): JsonResponse
     {
@@ -87,7 +136,16 @@ class MaintenanceController extends Controller
     }
 
     /**
-     * Remove the specified maintenance request.
+     * @OA\Delete(
+     *     path="/api/v1/hotels/{hotel}/maintenance/{maintenanceRequest}",
+     *     summary="Delete a maintenance request",
+     *     tags={"Maintenance"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="maintenanceRequest", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Maintenance request deleted successfully"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
     public function destroy(Hotel $hotel, MaintenanceRequest $maintenanceRequest): JsonResponse
     {
