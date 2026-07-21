@@ -23,12 +23,7 @@ class HotelSettingController extends Controller
      */
     public function show(Hotel $hotel): JsonResponse
     {
-        // Guarantee settings record exists
-        $setting = $hotel->settings ?: $hotel->settings()->create([
-            'currency' => 'KES',
-            'timezone' => 'Africa/Nairobi',
-            'language' => 'en',
-        ]);
+        $setting = $this->hotelSettingService->getSettings($hotel);
 
         $this->authorize('view', [$setting, $hotel]);
 
@@ -44,12 +39,7 @@ class HotelSettingController extends Controller
      */
     public function update(UpdateHotelSettingRequest $request, Hotel $hotel): JsonResponse
     {
-        // Guarantee settings record exists
-        $setting = $hotel->settings ?: $hotel->settings()->create([
-            'currency' => 'KES',
-            'timezone' => 'Africa/Nairobi',
-            'language' => 'en',
-        ]);
+        $setting = $this->hotelSettingService->getSettings($hotel);
 
         $this->authorize('update', [$setting, $hotel]);
 
