@@ -11,6 +11,7 @@ use App\Events\Bookings\BookingCreated;
 use App\Events\Bookings\BookingUpdated;
 use App\Models\Booking;
 use App\Models\Hotel;
+use App\Models\HousekeepingTask;
 use App\Models\Room;
 use App\Models\Service;
 use Carbon\Carbon;
@@ -206,16 +207,22 @@ class BookingService
     }
 
     /**
-     * Check out guest.
+     * Check out guest and auto-create housekeeping tasks for checked-out rooms.
      */
     public function checkOut(Booking $booking): Booking
     {
         return DB::transaction(function () use ($booking) {
             $booking->update(['status' => BookingStatus::CHECKED_OUT]);
 
-            // Update room status to cleaning
+            // Update room status to cleaning and create housekeeping task
             foreach ($booking->rooms as $room) {
                 $room->update(['status' => RoomStatus::CLEANING]);
+
+                HousekeepingTask::create([
+                    'room_id' => $room->id,
+                    'status' => 'pending',
+                    'scheduled_at' => now(),
+                ]);
             }
 
             event(new BookingCheckedOut($booking));
