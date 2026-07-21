@@ -7,22 +7,38 @@ use App\Events\Services\ServiceUpdated;
 use App\Events\Services\ServiceDeleted;
 use App\Models\Hotel;
 use App\Models\Service;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class AncillaryService
 {
+    /**
+     * Retrieve services for a hotel with caching.
+     */
+    public function getServices(Hotel $hotel)
+    {
+        return Cache::remember("hotel:{$hotel->id}:services", 3600, function () use ($hotel) {
+            return $hotel->services()->get();
+        });
+    }
+
     /**
      * Create a new ancillary service for a hotel.
      */
     public function create(Hotel $hotel, array $data): Service
     {
-        $data['is_active'] = $data['is_active'] ?? true;
+        return DB::transaction(function () use ($hotel, $data) {
+            $data['is_active'] = $data['is_active'] ?? true;
 
-        /** @var Service $service */
-        $service = $hotel->services()->create($data);
+            /** @var Service $service */
+            $service = $hotel->services()->create($data);
 
-        event(new ServiceCreated($service));
+            Cache::forget("hotel:{$hotel->id}:services");
 
-        return $service;
+            event(new ServiceCreated($service));
+
+            return $service;
+        });
     }
 
     /**
@@ -30,11 +46,15 @@ class AncillaryService
      */
     public function update(Service $service, array $data): Service
     {
-        $service->update($data);
+        return DB::transaction(function () use ($service, $data) {
+            $service->update($data);
 
-        event(new ServiceUpdated($service));
+            Cache::forget("hotel:{$service->hotel_id}:services");
 
-        return $service->fresh();
+            event(new ServiceUpdated($service));
+
+            return $service->fresh();
+        });
     }
 
     /**
@@ -42,8 +62,12 @@ class AncillaryService
      */
     public function delete(Service $service): bool
     {
-        event(new ServiceDeleted($service));
+        return DB::transaction(function () use ($service) {
+            Cache::forget("hotel:{$service->hotel_id}:services");
 
-        return $service->delete();
+            event(new ServiceDeleted($service));
+
+            return $service->delete();
+        });
     }
 }

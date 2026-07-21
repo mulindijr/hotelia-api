@@ -28,7 +28,7 @@ class ServiceController extends Controller
     {
         $this->authorize('viewAny', [Service::class, $hotel]);
 
-        $services = $hotel->services;
+        $services = $this->ancillaryService->getServices($hotel);
 
         return response()->json([
             'success' => true,
