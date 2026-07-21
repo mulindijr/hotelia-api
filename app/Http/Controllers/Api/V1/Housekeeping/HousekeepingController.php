@@ -13,12 +13,9 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * @OA\Tag(
- *     name="Housekeeping",
- *     description="Room cleaning tasks and assignment operations"
- * )
- */
+use OpenApi\Attributes as OA;
+
+#[OA\Tag(name: "Housekeeping", description: "Room cleaning tasks and assignment operations")]
 class HousekeepingController extends Controller
 {
     use AuthorizesRequests;
@@ -27,17 +24,19 @@ class HousekeepingController extends Controller
         protected HousekeepingService $housekeepingService
     ) {}
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/hotels/{hotel}/housekeeping",
-     *     summary="List all housekeeping tasks for a hotel",
-     *     tags={"Housekeeping"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Tasks list retrieved"),
-     *     @OA\Response(response=403, description="Forbidden")
-     * )
-     */
+    #[OA\Get(
+        path: "/api/v1/hotels/{hotel}/housekeeping",
+        summary: "List all housekeeping tasks for a hotel",
+        tags: ["Housekeeping"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Tasks list retrieved"),
+            new OA\Response(response: 403, description: "Forbidden")
+        ]
+    )]
     public function index(Request $request, Hotel $hotel): JsonResponse
     {
         $this->authorize('viewAny', [HousekeepingTask::class, $hotel]);
@@ -54,26 +53,30 @@ class HousekeepingController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/hotels/{hotel}/housekeeping",
-     *     summary="Create and assign a housekeeping task",
-     *     tags={"Housekeeping"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"room_id"},
-     *             @OA\Property(property="room_id", type="integer", example=1),
-     *             @OA\Property(property="assigned_to", type="integer", example=2),
-     *             @OA\Property(property="status", type="string", enum={"pending", "in_progress", "completed"}, example="pending")
-     *         )
-     *     ),
-     *     @OA\Response(response=201, description="Task created successfully"),
-     *     @OA\Response(response=422, description="Validation failed")
-     * )
-     */
+    #[OA\Post(
+        path: "/api/v1/hotels/{hotel}/housekeeping",
+        summary: "Create and assign a housekeeping task",
+        tags: ["Housekeeping"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["room_id"],
+                properties: [
+                    new OA\Property(property: "room_id", type: "integer", example: 1),
+                    new OA\Property(property: "assigned_to", type: "integer", example: 2),
+                    new OA\Property(property: "status", type: "string", enum: ["pending", "in_progress", "completed"], example: "pending")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Task created successfully"),
+            new OA\Response(response: 422, description: "Validation failed")
+        ]
+    )]
     public function store(StoreHousekeepingTaskRequest $request, Hotel $hotel): JsonResponse
     {
         $this->authorize('create', [HousekeepingTask::class, $hotel]);
@@ -87,18 +90,20 @@ class HousekeepingController extends Controller
         ], 201);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/hotels/{hotel}/housekeeping/{task}",
-     *     summary="Get housekeeping task details",
-     *     tags={"Housekeeping"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="task", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Task details retrieved"),
-     *     @OA\Response(response=404, description="Task not found")
-     * )
-     */
+    #[OA\Get(
+        path: "/api/v1/hotels/{hotel}/housekeeping/{task}",
+        summary: "Get housekeeping task details",
+        tags: ["Housekeeping"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: "task", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Task details retrieved"),
+            new OA\Response(response: 404, description: "Task not found")
+        ]
+    )]
     public function show(Hotel $hotel, HousekeepingTask $task): JsonResponse
     {
         $this->authorize('view', [$task, $hotel]);
@@ -110,18 +115,20 @@ class HousekeepingController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/v1/hotels/{hotel}/housekeeping/{task}",
-     *     summary="Update housekeeping task status",
-     *     tags={"Housekeeping"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="task", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Task updated successfully"),
-     *     @OA\Response(response=422, description="Validation failed")
-     * )
-     */
+    #[OA\Put(
+        path: "/api/v1/hotels/{hotel}/housekeeping/{task}",
+        summary: "Update housekeeping task status",
+        tags: ["Housekeeping"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: "task", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Task updated successfully"),
+            new OA\Response(response: 422, description: "Validation failed")
+        ]
+    )]
     public function update(UpdateHousekeepingTaskRequest $request, Hotel $hotel, HousekeepingTask $task): JsonResponse
     {
         $this->authorize('update', [$task, $hotel]);
@@ -135,18 +142,20 @@ class HousekeepingController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Delete(
-     *     path="/api/v1/hotels/{hotel}/housekeeping/{task}",
-     *     summary="Delete a housekeeping task",
-     *     tags={"Housekeeping"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="task", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Task deleted successfully"),
-     *     @OA\Response(response=403, description="Forbidden")
-     * )
-     */
+    #[OA\Delete(
+        path: "/api/v1/hotels/{hotel}/housekeeping/{task}",
+        summary: "Delete a housekeeping task",
+        tags: ["Housekeeping"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: "task", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Task deleted successfully"),
+            new OA\Response(response: 403, description: "Forbidden")
+        ]
+    )]
     public function destroy(Hotel $hotel, HousekeepingTask $task): JsonResponse
     {
         $this->authorize('delete', [$task, $hotel]);
