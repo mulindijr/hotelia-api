@@ -28,8 +28,8 @@ class AutoCancelStaleBookings implements ShouldQueue
      */
     public function handle(BookingService $bookingService): void
     {
-        $minutes = (int) config('services.booking.auto_cancel_minutes', env('BOOKING_AUTO_CANCEL_MINUTES', 120));
-        $threshold = now()->subMinutes($minutes);
+        $minutes = (int) env('BOOKING_AUTO_CANCEL_MINUTES', 120);
+        $threshold = now()->subMinutes($minutes)->toDateTimeString();
 
         $staleBookings = Booking::where('status', BookingStatus::PENDING)
             ->where('created_at', '<=', $threshold)
