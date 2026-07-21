@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\Invoice;
 use App\Models\Payment;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class BillingService
@@ -25,90 +26,92 @@ class BillingService
     }
 
     /**
-     * Recompute and regenerate booking invoice.
+     * Recompute and regenerate booking invoice inside a DB transaction.
      */
     public function regenerateInvoice(Booking $booking): Invoice
     {
-        $hotel = $booking->hotel;
-        $taxRate = $hotel->settings?->tax_rate ?? 0.00;
+        return DB::transaction(function () use ($booking) {
+            $hotel = $booking->hotel;
+            $taxRate = $hotel->settings?->tax_rate ?? 0.00;
 
-        // 1. Calculate nights stay
-        $checkIn = Carbon::parse($booking->check_in_date);
-        $checkOut = Carbon::parse($booking->check_out_date);
-        $nights = max(1, $checkIn->diffInDays($checkOut));
+            // 1. Calculate nights stay
+            $checkIn = Carbon::parse($booking->check_in_date);
+            $checkOut = Carbon::parse($booking->check_out_date);
+            $nights = max(1, $checkIn->diffInDays($checkOut));
 
-        $subtotal = 0.00;
-        $itemsData = [];
+            $subtotal = 0.00;
+            $itemsData = [];
 
-        // 2. Add rooms stays
-        $bookingRooms = $booking->rooms()->get();
-        foreach ($bookingRooms as $room) {
-            $pricePerNight = $room->pivot->price_per_night;
-            $totalPrice = $pricePerNight * $nights;
-            $subtotal += $totalPrice;
+            // 2. Add rooms stays
+            $bookingRooms = $booking->rooms()->get();
+            foreach ($bookingRooms as $room) {
+                $pricePerNight = $room->pivot->price_per_night;
+                $totalPrice = $pricePerNight * $nights;
+                $subtotal += $totalPrice;
 
-            $itemsData[] = [
-                'description' => "Room {$room->room_number} Nightly Stay ({$nights} nights)",
-                'quantity' => 1,
-                'unit_price' => $totalPrice,
-                'total_price' => $totalPrice,
-            ];
-        }
+                $itemsData[] = [
+                    'description' => "Room {$room->room_number} Nightly Stay ({$nights} nights)",
+                    'quantity' => 1,
+                    'unit_price' => $totalPrice,
+                    'total_price' => $totalPrice,
+                ];
+            }
 
-        // 3. Add services
-        $bookingServices = $booking->services()->get();
-        foreach ($bookingServices as $service) {
-            $price = $service->pivot->price;
-            $qty = $service->pivot->quantity;
-            $totalPrice = $price * $qty;
-            $subtotal += $totalPrice;
+            // 3. Add services
+            $bookingServices = $booking->services()->get();
+            foreach ($bookingServices as $service) {
+                $price = $service->pivot->price;
+                $qty = $service->pivot->quantity;
+                $totalPrice = $price * $qty;
+                $subtotal += $totalPrice;
 
-            $itemsData[] = [
-                'description' => "Service: {$service->name}",
-                'quantity' => $qty,
-                'unit_price' => $price,
-                'total_price' => $totalPrice,
-            ];
-        }
+                $itemsData[] = [
+                    'description' => "Service: {$service->name}",
+                    'quantity' => $qty,
+                    'unit_price' => $price,
+                    'total_price' => $totalPrice,
+                ];
+            }
 
-        $taxAmount = $subtotal * ($taxRate / 100);
-        $totalAmount = $subtotal + $taxAmount;
+            $taxAmount = $subtotal * ($taxRate / 100);
+            $totalAmount = $subtotal + $taxAmount;
 
-        // 4. Save Invoice
-        $invoice = $booking->invoices()->first();
+            // 4. Save Invoice
+            $invoice = $booking->invoices()->first();
 
-        if (!$invoice) {
-            $prefix = $hotel->settings?->invoice_prefix ?? 'INV-';
-            do {
-                $invoiceNumber = $prefix . date('Ymd') . strtoupper(Str::random(4));
-            } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
+            if (!$invoice) {
+                $prefix = $hotel->settings?->invoice_prefix ?? 'INV-';
+                do {
+                    $invoiceNumber = $prefix . date('Ymd') . strtoupper(Str::random(4));
+                } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
 
-            $invoice = Invoice::create([
-                'invoice_number' => $invoiceNumber,
-                'booking_id' => $booking->id,
-                'subtotal' => $subtotal,
-                'tax_amount' => $taxAmount,
-                'total_amount' => $totalAmount,
-                'status' => 'unpaid',
-            ]);
-        } else {
-            $invoice->update([
-                'subtotal' => $subtotal,
-                'tax_amount' => $taxAmount,
-                'total_amount' => $totalAmount,
-            ]);
-        }
+                $invoice = Invoice::create([
+                    'invoice_number' => $invoiceNumber,
+                    'booking_id' => $booking->id,
+                    'subtotal' => $subtotal,
+                    'tax_amount' => $taxAmount,
+                    'total_amount' => $totalAmount,
+                    'status' => 'unpaid',
+                ]);
+            } else {
+                $invoice->update([
+                    'subtotal' => $subtotal,
+                    'tax_amount' => $taxAmount,
+                    'total_amount' => $totalAmount,
+                ]);
+            }
 
-        // Sync items
-        $invoice->items()->delete();
-        foreach ($itemsData as $item) {
-            $invoice->items()->create($item);
-        }
+            // Sync items
+            $invoice->items()->delete();
+            foreach ($itemsData as $item) {
+                $invoice->items()->create($item);
+            }
 
-        // Recalculate status
-        $this->recalculateInvoiceStatus($booking);
+            // Recalculate status
+            $this->recalculateInvoiceStatus($booking);
 
-        return $invoice->fresh('items');
+            return $invoice->fresh('items');
+        });
     }
 
     /**
@@ -116,16 +119,18 @@ class BillingService
      */
     public function logPayment(Booking $booking, array $data): Payment
     {
-        $payment = $booking->payments()->create([
-            'amount' => $data['amount'],
-            'payment_method' => $data['payment_method'],
-            'transaction_reference' => $data['transaction_reference'] ?? null,
-            'status' => $data['status'] ?? 'completed',
-        ]);
+        return DB::transaction(function () use ($booking, $data) {
+            $payment = $booking->payments()->create([
+                'amount' => $data['amount'],
+                'payment_method' => $data['payment_method'],
+                'transaction_reference' => $data['transaction_reference'] ?? null,
+                'status' => $data['status'] ?? 'completed',
+            ]);
 
-        $this->recalculateInvoiceStatus($booking);
+            $this->recalculateInvoiceStatus($booking);
 
-        return $payment;
+            return $payment;
+        });
     }
 
     /**
@@ -133,11 +138,13 @@ class BillingService
      */
     public function updatePaymentStatus(Payment $payment, string $status): Payment
     {
-        $payment->update(['status' => $status]);
+        return DB::transaction(function () use ($payment, $status) {
+            $payment->update(['status' => $status]);
 
-        $this->recalculateInvoiceStatus($payment->booking);
+            $this->recalculateInvoiceStatus($payment->booking);
 
-        return $payment;
+            return $payment;
+        });
     }
 
     /**

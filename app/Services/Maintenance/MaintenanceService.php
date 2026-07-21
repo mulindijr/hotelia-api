@@ -7,44 +7,51 @@ use App\Events\Maintenance\MaintenanceRequestUpdated;
 use App\Events\Maintenance\MaintenanceRequestDeleted;
 use App\Models\Hotel;
 use App\Models\MaintenanceRequest;
+use Illuminate\Support\Facades\DB;
 
 class MaintenanceService
 {
     /**
-     * Create a new maintenance request.
+     * Create a new maintenance request inside a DB transaction.
      */
     public function create(Hotel $hotel, array $data, int $userId): MaintenanceRequest
     {
-        $data['reported_by'] = $data['reported_by'] ?? $userId;
-        $data['status'] = $data['status'] ?? 'open';
-        $data['priority'] = $data['priority'] ?? 'medium';
+        return DB::transaction(function () use ($data, $userId) {
+            $data['reported_by'] = $data['reported_by'] ?? $userId;
+            $data['status'] = $data['status'] ?? 'open';
+            $data['priority'] = $data['priority'] ?? 'medium';
 
-        $request = MaintenanceRequest::create($data);
+            $request = MaintenanceRequest::create($data);
 
-        event(new MaintenanceRequestCreated($request));
+            event(new MaintenanceRequestCreated($request));
 
-        return $request->load('room');
+            return $request->load('room');
+        });
     }
 
     /**
-     * Update a maintenance request.
+     * Update a maintenance request inside a DB transaction.
      */
     public function update(MaintenanceRequest $request, array $data): MaintenanceRequest
     {
-        $request->update($data);
+        return DB::transaction(function () use ($request, $data) {
+            $request->update($data);
 
-        event(new MaintenanceRequestUpdated($request));
+            event(new MaintenanceRequestUpdated($request));
 
-        return $request->fresh()->load('room');
+            return $request->fresh()->load('room');
+        });
     }
 
     /**
-     * Delete a maintenance request.
+     * Delete a maintenance request inside a DB transaction.
      */
     public function delete(MaintenanceRequest $request): bool
     {
-        event(new MaintenanceRequestDeleted($request));
+        return DB::transaction(function () use ($request) {
+            event(new MaintenanceRequestDeleted($request));
 
-        return $request->delete();
+            return $request->delete();
+        });
     }
 }
