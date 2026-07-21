@@ -25,4 +25,6 @@ final class NotificationTypes
   public const MAINTENANCE_CREATED = 'maintenance_created';
 
   public const HOUSEKEEPING_ASSIGNED = 'housekeeping_assigned';
+
+  public const ROOM_STUCK_IN_CLEANING = 'room_stuck_in_cleaning';
 }
