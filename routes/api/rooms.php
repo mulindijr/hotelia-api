@@ -16,12 +16,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // 2. Nested Room Types Routes under Hotels
-    Route::prefix('hotels/{hotel}/room-types')->group(function () {
+    Route::prefix('hotels/{hotel}/room-types')->scopeBindings()->group(function () {
         Route::get('/', [RoomTypeController::class, 'index'])->middleware('permission:view room types')->name('room-types.index');
         Route::post('/', [RoomTypeController::class, 'store'])->middleware('permission:create room types')->name('room-types.store');
-        Route::get('/{room_type}', [RoomTypeController::class, 'show'])->middleware('permission:view room types')->name('room-types.show');
-        Route::put('/{room_type}', [RoomTypeController::class, 'update'])->middleware('permission:update room types')->name('room-types.update');
-        Route::delete('/{room_type}', [RoomTypeController::class, 'destroy'])->middleware('permission:delete room types')->name('room-types.destroy');
+        Route::get('/{roomType}', [RoomTypeController::class, 'show'])->middleware('permission:view room types')->name('room-types.show');
+        Route::put('/{roomType}', [RoomTypeController::class, 'update'])->middleware('permission:update room types')->name('room-types.update');
+        Route::delete('/{roomType}', [RoomTypeController::class, 'destroy'])->middleware('permission:delete room types')->name('room-types.destroy');
     });
 
     // 3. Nested Rooms Routes under Hotels

@@ -12,6 +12,7 @@ Route::middleware(['auth:sanctum'])->prefix('hotels')->group(function () {
   Route::get('/{hotel}', [HotelController::class, 'show'])->middleware('permission:view hotels')->name('hotels.show');
 
   Route::put('/{hotel}', [HotelController::class, 'update'])->middleware('permission:update hotels')->name('hotels.update');
+  Route::patch('/{hotel}', [HotelController::class, 'update'])->middleware('permission:update hotels')->name('hotels.update');
 
   Route::delete('/{hotel}', [HotelController::class, 'destroy'])->middleware('permission:delete hotels')->name('hotels.destroy');
 

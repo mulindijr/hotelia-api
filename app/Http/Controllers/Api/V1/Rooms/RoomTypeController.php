@@ -26,9 +26,7 @@ class RoomTypeController extends Controller
      */
     public function index(Request $request, Hotel $hotel): JsonResponse
     {
-        if (!$request->user()->belongsToHotel($hotel->id) && !$request->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('viewAny', [RoomType::class, $hotel]);
 
         $roomTypes = $hotel->roomTypes()->with('amenities')->get();
 
@@ -44,9 +42,7 @@ class RoomTypeController extends Controller
      */
     public function store(StoreRoomTypeRequest $request, Hotel $hotel): JsonResponse
     {
-        if (!$request->user()->belongsToHotel($hotel->id) && !$request->user()->hasRole('super_admin')) {
-            abort(403, 'Unauthorized hotel scope.');
-        }
+        $this->authorize('create', [RoomType::class, $hotel]);
 
         $roomType = $this->roomTypeService->create($hotel, $request->validated());
 
@@ -62,7 +58,7 @@ class RoomTypeController extends Controller
      */
     public function show(Hotel $hotel, RoomType $roomType): JsonResponse
     {
-        $this->authorize('view', $roomType);
+        $this->authorize('view', [$roomType, $hotel]);
 
         return response()->json([
             'success' => true,
@@ -76,7 +72,7 @@ class RoomTypeController extends Controller
      */
     public function update(UpdateRoomTypeRequest $request, Hotel $hotel, RoomType $roomType): JsonResponse
     {
-        $this->authorize('update', $roomType);
+        $this->authorize('update', [$roomType, $hotel]);
 
         $updatedRoomType = $this->roomTypeService->update($roomType, $request->validated());
 
@@ -92,7 +88,7 @@ class RoomTypeController extends Controller
      */
     public function destroy(Hotel $hotel, RoomType $roomType): JsonResponse
     {
-        $this->authorize('delete', $roomType);
+        $this->authorize('delete', [$roomType, $hotel]);
 
         $this->roomTypeService->delete($roomType);
 
