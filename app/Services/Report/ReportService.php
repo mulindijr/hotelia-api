@@ -9,62 +9,65 @@ use App\Models\Room;
 use App\Models\HousekeepingTask;
 use App\Models\MaintenanceRequest;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ReportService
 {
     /**
-     * Compute real-time operational dashboard stats.
+     * Compute operational dashboard stats with 5-minute caching per hotel.
      */
     public function getDashboardStats(Hotel $hotel): array
     {
-        $roomIds = $hotel->rooms()->pluck('id')->toArray();
-        $totalRooms = count($roomIds);
+        return Cache::remember("hotel:{$hotel->id}:dashboard_stats", 300, function () use ($hotel) {
+            $roomIds = $hotel->rooms()->pluck('id')->toArray();
+            $totalRooms = count($roomIds);
 
-        // 1. Occupancy statistics
-        $occupiedCount = $hotel->rooms()->where('status', 'occupied')->count();
-        $occupancyRate = $totalRooms > 0 ? round(($occupiedCount / $totalRooms) * 100, 2) : 0.00;
+            // 1. Occupancy statistics
+            $occupiedCount = $hotel->rooms()->where('status', 'occupied')->count();
+            $occupancyRate = $totalRooms > 0 ? round(($occupiedCount / $totalRooms) * 100, 2) : 0.00;
 
-        // 2. Room status breakdown
-        $roomStatuses = $hotel->rooms()
-            ->select('status', DB::raw('count(*) as count'))
-            ->groupBy('status')
-            ->pluck('count', 'status')
-            ->toArray();
+            // 2. Room status breakdown
+            $roomStatuses = $hotel->rooms()
+                ->select('status', DB::raw('count(*) as count'))
+                ->groupBy('status')
+                ->pluck('count', 'status')
+                ->toArray();
 
-        // 3. Housekeeping stats
-        $housekeepingStats = HousekeepingTask::whereIn('room_id', $roomIds)
-            ->select('status', DB::raw('count(*) as count'))
-            ->groupBy('status')
-            ->pluck('count', 'status')
-            ->toArray();
+            // 3. Housekeeping stats
+            $housekeepingStats = HousekeepingTask::whereIn('room_id', $roomIds)
+                ->select('status', DB::raw('count(*) as count'))
+                ->groupBy('status')
+                ->pluck('count', 'status')
+                ->toArray();
 
-        // 4. Maintenance stats (open or in_progress)
-        $activeMaintenance = MaintenanceRequest::whereIn('room_id', $roomIds)
-            ->whereIn('status', ['open', 'in_progress'])
-            ->count();
+            // 4. Maintenance stats (open or in_progress)
+            $activeMaintenance = MaintenanceRequest::whereIn('room_id', $roomIds)
+                ->whereIn('status', ['open', 'in_progress'])
+                ->count();
 
-        // 5. Active checked-in bookings
-        $activeBookingsCount = $hotel->bookings()->where('status', 'checked_in')->count();
+            // 5. Active checked-in bookings
+            $activeBookingsCount = $hotel->bookings()->where('status', 'checked_in')->count();
 
-        return [
-            'total_rooms' => $totalRooms,
-            'occupied_rooms' => $occupiedCount,
-            'occupancy_rate' => $occupancyRate,
-            'room_statuses' => [
-                'available' => $roomStatuses['available'] ?? 0,
-                'occupied' => $roomStatuses['occupied'] ?? 0,
-                'cleaning' => $roomStatuses['cleaning'] ?? 0,
-                'maintenance' => $roomStatuses['maintenance'] ?? 0,
-            ],
-            'housekeeping_tasks' => [
-                'pending' => $housekeepingStats['pending'] ?? 0,
-                'in_progress' => $housekeepingStats['in_progress'] ?? 0,
-                'completed' => $housekeepingStats['completed'] ?? 0,
-            ],
-            'active_maintenance_requests' => $activeMaintenance,
-            'active_bookings_count' => $activeBookingsCount,
-        ];
+            return [
+                'total_rooms' => $totalRooms,
+                'occupied_rooms' => $occupiedCount,
+                'occupancy_rate' => $occupancyRate,
+                'room_statuses' => [
+                    'available' => $roomStatuses['available'] ?? 0,
+                    'occupied' => $roomStatuses['occupied'] ?? 0,
+                    'cleaning' => $roomStatuses['cleaning'] ?? 0,
+                    'maintenance' => $roomStatuses['maintenance'] ?? 0,
+                ],
+                'housekeeping_tasks' => [
+                    'pending' => $housekeepingStats['pending'] ?? 0,
+                    'in_progress' => $housekeepingStats['in_progress'] ?? 0,
+                    'completed' => $housekeepingStats['completed'] ?? 0,
+                ],
+                'active_maintenance_requests' => $activeMaintenance,
+                'active_bookings_count' => $activeBookingsCount,
+            ];
+        });
     }
 
     /**
