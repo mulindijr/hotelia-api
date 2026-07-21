@@ -13,12 +13,9 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * @OA\Tag(
- *     name="Rooms",
- *     description="Physical hotel room inventory management"
- * )
- */
+use OpenApi\Attributes as OA;
+
+#[OA\Tag(name: "Rooms", description: "Physical hotel room inventory management")]
 class RoomController extends Controller
 {
     use AuthorizesRequests;
@@ -27,17 +24,19 @@ class RoomController extends Controller
         protected RoomService $roomService
     ) {}
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/hotels/{hotel}/rooms",
-     *     summary="List all rooms in a hotel",
-     *     tags={"Rooms"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Rooms list retrieved"),
-     *     @OA\Response(response=403, description="Forbidden")
-     * )
-     */
+    #[OA\Get(
+        path: "/api/v1/hotels/{hotel}/rooms",
+        summary: "List all rooms in a hotel",
+        tags: ["Rooms"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Rooms list retrieved"),
+            new OA\Response(response: 403, description: "Forbidden")
+        ]
+    )]
     public function index(Request $request, Hotel $hotel): JsonResponse
     {
         $this->authorize('viewAny', [Room::class, $hotel]);
@@ -51,26 +50,30 @@ class RoomController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/hotels/{hotel}/rooms",
-     *     summary="Create a new physical room",
-     *     tags={"Rooms"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"room_type_id", "room_number", "floor"},
-     *             @OA\Property(property="room_type_id", type="integer", example=1),
-     *             @OA\Property(property="room_number", type="string", example="101"),
-     *             @OA\Property(property="floor", type="integer", example=1)
-     *         )
-     *     ),
-     *     @OA\Response(response=201, description="Room created successfully"),
-     *     @OA\Response(response=422, description="Validation failed")
-     * )
-     */
+    #[OA\Post(
+        path: "/api/v1/hotels/{hotel}/rooms",
+        summary: "Create a new physical room",
+        tags: ["Rooms"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["room_type_id", "room_number", "floor"],
+                properties: [
+                    new OA\Property(property: "room_type_id", type: "integer", example: 1),
+                    new OA\Property(property: "room_number", type: "string", example: "101"),
+                    new OA\Property(property: "floor", type: "integer", example: 1)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Room created successfully"),
+            new OA\Response(response: 422, description: "Validation failed")
+        ]
+    )]
     public function store(StoreRoomRequest $request, Hotel $hotel): JsonResponse
     {
         $this->authorize('create', [Room::class, $hotel]);
@@ -84,18 +87,20 @@ class RoomController extends Controller
         ], 201);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/hotels/{hotel}/rooms/{room}",
-     *     summary="Get room details",
-     *     tags={"Rooms"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="room", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Room details retrieved"),
-     *     @OA\Response(response=404, description="Room not found")
-     * )
-     */
+    #[OA\Get(
+        path: "/api/v1/hotels/{hotel}/rooms/{room}",
+        summary: "Get room details",
+        tags: ["Rooms"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: "room", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Room details retrieved"),
+            new OA\Response(response: 404, description: "Room not found")
+        ]
+    )]
     public function show(Hotel $hotel, Room $room): JsonResponse
     {
         $this->authorize('view', [$room, $hotel]);
@@ -107,18 +112,20 @@ class RoomController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/v1/hotels/{hotel}/rooms/{room}",
-     *     summary="Update room details or status",
-     *     tags={"Rooms"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="room", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Room updated successfully"),
-     *     @OA\Response(response=422, description="Validation failed")
-     * )
-     */
+    #[OA\Put(
+        path: "/api/v1/hotels/{hotel}/rooms/{room}",
+        summary: "Update room details or status",
+        tags: ["Rooms"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: "room", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Room updated successfully"),
+            new OA\Response(response: 422, description: "Validation failed")
+        ]
+    )]
     public function update(UpdateRoomRequest $request, Hotel $hotel, Room $room): JsonResponse
     {
         $this->authorize('update', [$room, $hotel]);
@@ -132,18 +139,20 @@ class RoomController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Delete(
-     *     path="/api/v1/hotels/{hotel}/rooms/{room}",
-     *     summary="Soft delete a room",
-     *     tags={"Rooms"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="room", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Room deleted successfully"),
-     *     @OA\Response(response=403, description="Forbidden")
-     * )
-     */
+    #[OA\Delete(
+        path: "/api/v1/hotels/{hotel}/rooms/{room}",
+        summary: "Soft delete a room",
+        tags: ["Rooms"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: "room", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Room deleted successfully"),
+            new OA\Response(response: 403, description: "Forbidden")
+        ]
+    )]
     public function destroy(Hotel $hotel, Room $room): JsonResponse
     {
         $this->authorize('delete', [$room, $hotel]);
