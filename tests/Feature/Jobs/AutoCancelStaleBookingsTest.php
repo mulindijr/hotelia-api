@@ -18,10 +18,16 @@ class AutoCancelStaleBookingsTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
+    }
+
     public function test_auto_cancel_stale_bookings_cancels_old_pending_bookings(): void
     {
         $hotel = Hotel::factory()->create();
-        $guest = Guest::factory()->create(['hotel_id' => $hotel->id]);
+        $guest = Guest::factory()->create();
         $roomType = RoomType::factory()->create(['hotel_id' => $hotel->id]);
         $room = Room::factory()->create(['hotel_id' => $hotel->id, 'room_type_id' => $roomType->id]);
 
@@ -34,9 +40,9 @@ class AutoCancelStaleBookingsTest extends TestCase
             'check_out_date' => now()->addDays(3)->toDateString(),
             'total_amount' => 200.00,
             'status' => BookingStatus::PENDING,
-            'created_at' => now()->subHours(3),
         ]);
         $staleBooking->rooms()->attach($room->id, ['price_per_night' => 100.00]);
+        Booking::where('id', $staleBooking->id)->update(['created_at' => now()->subHours(3)->toDateTimeString()]);
 
         // Recent pending booking (created 10 minutes ago)
         $recentBooking = Booking::create([
