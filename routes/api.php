@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')
+  ->middleware('throttle:api')
   ->scopeBindings()
   ->group(function () {
     require base_path('routes/api/auth.php');
