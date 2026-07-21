@@ -9,6 +9,12 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * @OA\Tag(
+ *     name="Reports",
+ *     description="Operational and financial reporting dashboard endpoints"
+ * )
+ */
 class ReportController extends Controller
 {
     use AuthorizesRequests;
@@ -18,7 +24,15 @@ class ReportController extends Controller
     ) {}
 
     /**
-     * Fetch daily operational statistics dashboard.
+     * @OA\Get(
+     *     path="/api/v1/hotels/{hotel}/reports/dashboard",
+     *     summary="Retrieve real-time operational dashboard stats for a hotel",
+     *     tags={"Reports"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Dashboard statistics retrieved successfully"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
     public function dashboard(Hotel $hotel): JsonResponse
     {
@@ -34,7 +48,17 @@ class ReportController extends Controller
     }
 
     /**
-     * Fetch range-based financial revenue statistics.
+     * @OA\Get(
+     *     path="/api/v1/hotels/{hotel}/reports/revenue",
+     *     summary="Retrieve range-based financial revenue KPIs (ADR, RevPAR, payments)",
+     *     tags={"Reports"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="start_date", in="query", required=false, @OA\Schema(type="string", format="date", example="2026-07-01")),
+     *     @OA\Parameter(name="end_date", in="query", required=false, @OA\Schema(type="string", format="date", example="2026-07-31")),
+     *     @OA\Response(response=200, description="Revenue statistics retrieved successfully"),
+     *     @OA\Response(response=422, description="Validation failed")
+     * )
      */
     public function revenue(Request $request, Hotel $hotel): JsonResponse
     {
