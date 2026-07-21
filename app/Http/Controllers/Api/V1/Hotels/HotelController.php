@@ -14,6 +14,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @OA\Tag(
+ *     name="Hotels",
+ *     description="Multi-tenant hotel management endpoints"
+ * )
+ */
 class HotelController extends Controller
 {
     use AuthorizesRequests;
@@ -23,7 +29,16 @@ class HotelController extends Controller
     ) {}
 
     /**
-     * Display a listing of hotels.
+     * @OA\Get(
+     *     path="/api/v1/hotels",
+     *     summary="List all accessible hotels for the user",
+     *     tags={"Hotels"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
+     *     @OA\Response(response=200, description="Hotels retrieved successfully"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -69,6 +84,27 @@ class HotelController extends Controller
     /**
      * Store a newly created hotel.
      */
+    /**
+     * @OA\Post(
+     *     path="/api/v1/hotels",
+     *     summary="Create a new hotel",
+     *     tags={"Hotels"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "email", "phone", "country", "city"},
+     *             @OA\Property(property="name", type="string", example="Grand Hotelia"),
+     *             @OA\Property(property="email", type="string", format="email", example="info@grandhotelia.com"),
+     *             @OA\Property(property="phone", type="string", example="+254700000000"),
+     *             @OA\Property(property="country", type="string", example="Kenya"),
+     *             @OA\Property(property="city", type="string", example="Nairobi")
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Hotel created successfully"),
+     *     @OA\Response(response=422, description="Validation failed")
+     * )
+     */
     public function store(StoreHotelRequest $request): JsonResponse
     {
         $this->authorize('create', Hotel::class);
@@ -86,7 +122,15 @@ class HotelController extends Controller
     }
 
     /**
-     * Display the specified hotel.
+     * @OA\Get(
+     *     path="/api/v1/hotels/{hotel}",
+     *     summary="Get hotel details by ID",
+     *     tags={"Hotels"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Hotel details retrieved"),
+     *     @OA\Response(response=404, description="Hotel not found")
+     * )
      */
     public function show(Hotel $hotel): JsonResponse
     {
@@ -106,7 +150,16 @@ class HotelController extends Controller
     }
 
     /**
-     * Update the specified hotel.
+     * @OA\Put(
+     *     path="/api/v1/hotels/{hotel}",
+     *     summary="Update hotel profile",
+     *     tags={"Hotels"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Hotel updated successfully"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Hotel not found")
+     * )
      */
     public function update(UpdateHotelRequest $request, Hotel $hotel): JsonResponse
     {
@@ -125,7 +178,15 @@ class HotelController extends Controller
     }
 
     /**
-     * Remove the specified hotel.
+     * @OA\Delete(
+     *     path="/api/v1/hotels/{hotel}",
+     *     summary="Soft delete a hotel",
+     *     tags={"Hotels"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="hotel", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Hotel deleted successfully"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
     public function destroy(Hotel $hotel): JsonResponse
     {
