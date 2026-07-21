@@ -15,33 +15,32 @@ use App\Models\FailedLoginAttempt;
 
 use App\Models\PasswordHistory;
 
-/**
- * @OA\Tag(
- *     name="Authentication",
- *     description="User authentication and password management endpoints"
- * )
- */
+use OpenApi\Attributes as OA;
+
+#[OA\Tag(name: "Authentication", description: "User authentication and password management endpoints")]
 class AuthController extends Controller
 {
-    /**
-     * @OA\Post(
-     *     path="/api/v1/auth/login",
-     *     summary="Authenticate user and issue Sanctum token",
-     *     tags={"Authentication"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"email", "password"},
-     *             @OA\Property(property="email", type="string", format="email", example="admin@hotelia.app"),
-     *             @OA\Property(property="password", type="string", format="password", example="Secret123!")
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Login successful"),
-     *     @OA\Response(response=401, description="Invalid credentials"),
-     *     @OA\Response(response=423, description="Account temporarily locked"),
-     *     @OA\Response(response=429, description="Too many login attempts")
-     * )
-     */
+    #[OA\Post(
+        path: "/api/v1/auth/login",
+        summary: "Authenticate user and issue Sanctum token",
+        tags: ["Authentication"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["email", "password"],
+                properties: [
+                    new OA\Property(property: "email", type: "string", format: "email", example: "admin@hotelia.app"),
+                    new OA\Property(property: "password", type: "string", format: "password", example: "Secret123!")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Login successful"),
+            new OA\Response(response: 401, description: "Invalid credentials"),
+            new OA\Response(response: 423, description: "Account temporarily locked"),
+            new OA\Response(response: 429, description: "Too many login attempts")
+        ]
+    )]
     public function login(LoginRequest $request)
     {
         // Check if user exists
@@ -122,16 +121,16 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/auth/me",
-     *     summary="Retrieve current user profile with roles and permissions",
-     *     tags={"Authentication"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Response(response=200, description="User profile retrieved"),
-     *     @OA\Response(response=401, description="Unauthenticated")
-     * )
-     */
+    #[OA\Get(
+        path: "/api/v1/auth/me",
+        summary: "Retrieve current user profile with roles and permissions",
+        tags: ["Authentication"],
+        security: [["bearerAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "User profile retrieved"),
+            new OA\Response(response: 401, description: "Unauthenticated")
+        ]
+    )]
     public function me(Request $request)
     {
         return response()->json([
@@ -139,16 +138,16 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/auth/logout",
-     *     summary="Logout and revoke current token",
-     *     tags={"Authentication"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Response(response=200, description="Logged out successfully"),
-     *     @OA\Response(response=401, description="Unauthenticated")
-     * )
-     */
+    #[OA\Post(
+        path: "/api/v1/auth/logout",
+        summary: "Logout and revoke current token",
+        tags: ["Authentication"],
+        security: [["bearerAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Logged out successfully"),
+            new OA\Response(response: 401, description: "Unauthenticated")
+        ]
+    )]
     public function logout(Request $request)
     {
         LoginHistory::where('user_id', $request->user()->id)
@@ -167,25 +166,27 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/auth/change-password",
-     *     summary="Change user password with complexity and history checks",
-     *     tags={"Authentication"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"current_password", "new_password", "new_password_confirmation"},
-     *             @OA\Property(property="current_password", type="string", format="password"),
-     *             @OA\Property(property="new_password", type="string", format="password"),
-     *             @OA\Property(property="new_password_confirmation", type="string", format="password")
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Password changed successfully"),
-     *     @OA\Response(response=422, description="Validation failed or password reuse violation")
-     * )
-     */
+    #[OA\Post(
+        path: "/api/v1/auth/change-password",
+        summary: "Change user password with complexity and history checks",
+        tags: ["Authentication"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["current_password", "new_password", "new_password_confirmation"],
+                properties: [
+                    new OA\Property(property: "current_password", type: "string", format: "password"),
+                    new OA\Property(property: "new_password", type: "string", format: "password"),
+                    new OA\Property(property: "new_password_confirmation", type: "string", format: "password")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Password changed successfully"),
+            new OA\Response(response: 422, description: "Validation failed or password reuse violation")
+        ]
+    )]
     public function changePassword(ChangePasswordRequest $request)
     {
         $user = $request->user();
