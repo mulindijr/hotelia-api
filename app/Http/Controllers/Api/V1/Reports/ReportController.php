@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Hotels;
+namespace App\Http\Controllers\Api\V1\Reports;
 
 use App\Http\Controllers\Controller;
 use App\Models\Hotel;

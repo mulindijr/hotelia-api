@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\Hotels\BookingController;
+use App\Http\Controllers\Api\V1\Bookings\BookingController;
 use App\Constants\Permissions;
 
 Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/bookings')->scopeBindings()->group(function () {

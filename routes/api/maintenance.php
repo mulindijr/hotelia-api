@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\Hotels\MaintenanceController;
+use App\Http\Controllers\Api\V1\Maintenance\MaintenanceController;
 use App\Constants\Permissions;
 
 Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/maintenance')->scopeBindings()->group(function () {

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\Hotels\ReportController;
+use App\Http\Controllers\Api\V1\Reports\ReportController;
 use App\Constants\Permissions;
 
 Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/reports')->scopeBindings()->group(function () {
