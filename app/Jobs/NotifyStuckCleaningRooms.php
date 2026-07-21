@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Constants\Permissions;
 use App\Constants\RoomStatus;
 use App\Models\Room;
 use App\Notifications\Housekeeping\StuckInCleaningNotification;
@@ -10,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
@@ -30,26 +32,50 @@ class NotifyStuckCleaningRooms implements ShouldQueue
     public function handle(): void
     {
         $minutes = (int) env('ROOM_CLEANING_ALERT_MINUTES', 120);
-        $threshold = now()->subMinutes($minutes);
+        $threshold = now()->subMinutes($minutes)->toDateTimeString();
 
+        // Query rooms stuck in cleaning without eager loading all hotel users upfront
         $stuckRooms = Room::where('status', RoomStatus::CLEANING)
             ->where('updated_at', '<=', $threshold)
-            ->with(['hotel', 'hotel.users'])
+            ->with('hotel')
             ->get();
 
-        foreach ($stuckRooms as $room) {
-            $hotel = $room->hotel;
+        if ($stuckRooms->isEmpty()) {
+            return;
+        }
+
+        // Group by hotel to eliminate N+1 queries for recipient lookup
+        $roomsByHotel = $stuckRooms->groupBy('hotel_id');
+
+        foreach ($roomsByHotel as $hotelId => $rooms) {
+            $hotel = $rooms->first()?->hotel;
             if (!$hotel) {
                 continue;
             }
 
-            // Find staff who are managers or housekeepers at the hotel
-            $staff = $hotel->users()->role(['hotel_manager', 'housekeeper'])->get();
+            // Permission-based recipient selection (decoupled from hardcoded role names)
+            $recipients = $hotel->users()
+                ->permission([Permissions::VIEW_HOUSEKEEPING, Permissions::MANAGE_HOUSEKEEPING])
+                ->get();
 
-            if ($staff->isNotEmpty()) {
-                Notification::send($staff, new StuckInCleaningNotification($room, $minutes));
+            if ($recipients->isEmpty()) {
+                continue;
+            }
+
+            foreach ($rooms as $room) {
+                // Deduplication: Cooldown check to prevent repeated spam notifications for the same stuck room
+                $cacheKey = "stuck_cleaning_notified:room:{$room->id}";
+                if (Cache::has($cacheKey)) {
+                    continue;
+                }
+
+                Notification::send($recipients, new StuckInCleaningNotification($room, $minutes));
+
+                Cache::put($cacheKey, true, now()->addMinutes($minutes));
+
                 Log::info("Sent StuckInCleaningNotification for Room #{$room->room_number} (Hotel #{$hotel->id}).");
             }
         }
     }
 }
+
