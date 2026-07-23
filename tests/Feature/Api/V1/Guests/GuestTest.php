@@ -3,10 +3,14 @@
 namespace Tests\Feature\Api\V1\Guests;
 
 use App\Models\Guest;
+use App\Models\Booking;
+use App\Models\Hotel;
 use Tests\ApiTestCase;
+use Tests\Traits\InteractsWithHotels;
 
 class GuestTest extends ApiTestCase
 {
+    use InteractsWithHotels;
     /**
      * Test listing guests.
      */
@@ -168,5 +172,96 @@ class GuestTest extends ApiTestCase
         $response = $this->deleteJson(route('guests.destroy', $guest));
 
         $response->assertStatus(403);
+    }
+
+    /**
+     * Test authorized user can view guest bookings.
+     */
+    public function test_user_can_view_guest_bookings(): void
+    {
+        $user = $this->actingAsRole('receptionist');
+        $hotel = $this->createHotelForUser($user);
+        $guest = Guest::factory()->create();
+
+        Booking::factory()->count(2)->create([
+            'guest_id' => $guest->id,
+            'hotel_id' => $hotel->id,
+        ]);
+
+        $response = $this->getJson(route('guests.bookings', $guest));
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonCount(2, 'data');
+    }
+
+    /**
+     * Test tenant isolation for guest bookings.
+     */
+    public function test_user_cannot_view_guest_bookings_from_unassociated_hotels(): void
+    {
+        $user = $this->actingAsRole('receptionist');
+        $hotelA = $this->createHotelForUser($user);
+        $hotelB = Hotel::factory()->create(); // Unassociated hotel
+        $guest = Guest::factory()->create();
+
+        // Booking at Hotel A (associated)
+        Booking::factory()->create([
+            'guest_id' => $guest->id,
+            'hotel_id' => $hotelA->id,
+        ]);
+
+        // Booking at Hotel B (unassociated)
+        Booking::factory()->create([
+            'guest_id' => $guest->id,
+            'hotel_id' => $hotelB->id,
+        ]);
+
+        $response = $this->getJson(route('guests.bookings', $guest));
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonCount(1, 'data') // only the booking for Hotel A
+            ->assertJsonPath('data.0.hotel_id', $hotelA->id);
+    }
+
+    /**
+     * Test user without permission cannot view guest bookings.
+     */
+    public function test_user_without_permission_cannot_view_guest_bookings(): void
+    {
+        $this->actingAsRole('housekeeper'); // Has no view bookings permission
+        $guest = Guest::factory()->create();
+
+        $response = $this->getJson(route('guests.bookings', $guest));
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Test super admin can view all guest bookings.
+     */
+    public function test_super_admin_can_view_all_guest_bookings(): void
+    {
+        $user = $this->actingAsRole('super_admin');
+        $hotelA = Hotel::factory()->create();
+        $hotelB = Hotel::factory()->create();
+        $guest = Guest::factory()->create();
+
+        Booking::factory()->create([
+            'guest_id' => $guest->id,
+            'hotel_id' => $hotelA->id,
+        ]);
+
+        Booking::factory()->create([
+            'guest_id' => $guest->id,
+            'hotel_id' => $hotelB->id,
+        ]);
+
+        $response = $this->getJson(route('guests.bookings', $guest));
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonCount(2, 'data');
     }
 }
