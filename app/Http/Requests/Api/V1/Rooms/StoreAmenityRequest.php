@@ -4,7 +4,7 @@ namespace App\Http\Requests\Api\V1\Rooms;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Validation\Rule;
 class StoreAmenityRequest extends FormRequest
 {
     /**
@@ -23,7 +23,7 @@ class StoreAmenityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'unique:amenities,name'],
+            'name' => ['required', 'string', 'max:255', Rule::unique('amenities', 'name')->withoutTrashed()],
             'description' => ['nullable', 'string'],
         ];
     }
