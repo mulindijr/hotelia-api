@@ -132,7 +132,7 @@ class GuestController extends Controller
         $query = $guest->bookings()->with(['guest', 'rooms.roomType', 'services']);
 
         if (!$user->hasRole('super_admin')) {
-            $hotelIds = $user->hotels()->pluck('id');
+            $hotelIds = $user->hotels()->pluck('hotels.id');
             $query->whereIn('hotel_id', $hotelIds);
         }
 
