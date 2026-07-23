@@ -119,4 +119,29 @@ class GuestController extends Controller
             'message' => 'Guest Deleted Successfully.',
         ]);
     }
+
+    /**
+     * Display a listing of the guest's bookings.
+     */
+    public function bookings(Request $request, Guest $guest): JsonResponse
+    {
+        $this->authorize('view', $guest);
+
+        $user = $request->user();
+
+        $query = $guest->bookings()->with(['guest', 'rooms.roomType', 'services']);
+
+        if (!$user->hasRole('super_admin')) {
+            $hotelIds = $user->hotels()->pluck('id');
+            $query->whereIn('hotel_id', $hotelIds);
+        }
+
+        $bookings = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Guest Bookings Retrieved Successfully.',
+            'data' => \App\Http\Resources\Api\V1\Bookings\BookingResource::collection($bookings),
+        ]);
+    }
 }
