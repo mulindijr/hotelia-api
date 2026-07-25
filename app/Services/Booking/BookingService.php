@@ -17,6 +17,7 @@ use App\Models\Service;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class BookingService
 {
@@ -40,6 +41,7 @@ class BookingService
             // 2. Perform in-transaction double-booking verification
             $conflictingBookings = Booking::where('hotel_id', $hotel->id)
                 ->where('status', '!=', BookingStatus::CANCELLED)
+                ->where('status', '!=', BookingStatus::NO_SHOW)
                 ->whereHas('rooms', function ($query) use ($roomIds) {
                     $query->whereIn('rooms.id', $roomIds);
                 })
@@ -49,10 +51,15 @@ class BookingService
                 })
                 ->exists();
 
+            $isOverbooked = false;
             if ($conflictingBookings) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
-                    'rooms' => 'One or more selected rooms are no longer available for the selected date range.',
-                ]);
+                $allowOverbooking = $hotel->settings?->allow_overbooking ?? false;
+                if (!$allowOverbooking) {
+                    throw ValidationException::withMessages([
+                        'rooms' => 'One or more selected rooms are no longer available for the selected date range.',
+                    ]);
+                }
+                $isOverbooked = true;
             }
 
             // 3. Generate unique booking reference
@@ -90,6 +97,8 @@ class BookingService
 
             $totalAmount = $totalRoomCost + $servicesCost;
 
+            $status = $data['status'] ?? BookingStatus::PENDING;
+
             // 6. Create Booking record
             /** @var Booking $booking */
             $booking = Booking::create([
@@ -101,13 +110,19 @@ class BookingService
                 'adults' => $data['adults'] ?? 1,
                 'children' => $data['children'] ?? 0,
                 'total_amount' => $totalAmount,
-                'status' => $data['status'] ?? BookingStatus::PENDING,
+                'status' => $status,
                 'notes' => $data['notes'] ?? null,
+                'is_overbooked' => $isOverbooked,
             ]);
 
             // 7. Attach rooms
             foreach ($rooms as $room) {
                 $booking->rooms()->attach($room->id, ['price_per_night' => $room->roomType->base_price]);
+                
+                // Set room status to reserved if the booking status is active/pending/confirmed
+                if (in_array($status, [BookingStatus::PENDING, BookingStatus::CONFIRMED])) {
+                    $room->update(['status' => RoomStatus::RESERVED]);
+                }
             }
 
             // 8. Attach services
@@ -131,9 +146,42 @@ class BookingService
             $checkOut = $data['check_out_date'] ?? $booking->check_out_date->toDateString();
             $nights = max(1, Carbon::parse($checkIn)->diffInDays(Carbon::parse($checkOut)));
 
+            // Validate status transition if status is being updated
+            if (isset($data['status'])) {
+                $this->guardStatusTransition($booking, $data['status']);
+            }
+
             // Sync and compute rooms
             $roomIds = $data['rooms'] ?? $booking->rooms()->pluck('rooms.id')->toArray();
             $rooms = Room::whereIn('id', $roomIds)->with('roomType')->lockForUpdate()->get();
+            
+            // Check conflicts for rooms/dates if changed
+            $conflictingBookings = Booking::where('hotel_id', $booking->hotel_id)
+                ->where('id', '!=', $booking->id)
+                ->where('status', '!=', BookingStatus::CANCELLED)
+                ->where('status', '!=', BookingStatus::NO_SHOW)
+                ->whereHas('rooms', function ($query) use ($roomIds) {
+                    $query->whereIn('rooms.id', $roomIds);
+                })
+                ->where(function ($query) use ($checkIn, $checkOut) {
+                    $query->where('check_in_date', '<', $checkOut)
+                          ->where('check_out_date', '>', $checkIn);
+                })
+                ->exists();
+
+            $isOverbooked = $booking->is_overbooked;
+            if ($conflictingBookings) {
+                $allowOverbooking = $booking->hotel->settings?->allow_overbooking ?? false;
+                if (!$allowOverbooking) {
+                    throw ValidationException::withMessages([
+                        'rooms' => 'One or more selected rooms are no longer available for the selected date range.',
+                    ]);
+                }
+                $isOverbooked = true;
+            } else {
+                $isOverbooked = false;
+            }
+
             $totalRoomCost = $rooms->sum(fn($r) => $r->roomType->base_price * $nights);
 
             // Sync and compute services
@@ -157,7 +205,13 @@ class BookingService
 
             $totalAmount = $totalRoomCost + $servicesCost;
 
-            $booking->update(array_merge($data, ['total_amount' => $totalAmount]));
+            // Get original room IDs to manage room status changes
+            $oldRoomIds = $booking->rooms()->pluck('rooms.id')->toArray();
+
+            $booking->update(array_merge($data, [
+                'total_amount' => $totalAmount,
+                'is_overbooked' => $isOverbooked,
+            ]));
 
             if (isset($data['rooms'])) {
                 $syncData = [];
@@ -165,6 +219,26 @@ class BookingService
                     $syncData[$room->id] = ['price_per_night' => $room->roomType->base_price];
                 }
                 $booking->rooms()->sync($syncData);
+            }
+
+            // Sync room statuses
+            $newStatus = $booking->status;
+            // 1. Release removed rooms
+            $removedRoomIds = array_diff($oldRoomIds, $roomIds);
+            if (!empty($removedRoomIds)) {
+                Room::whereIn('id', $removedRoomIds)->update(['status' => RoomStatus::AVAILABLE]);
+            }
+            // 2. Set statuses for current rooms based on booking status
+            foreach ($rooms as $room) {
+                if (in_array($newStatus, [BookingStatus::PENDING, BookingStatus::CONFIRMED])) {
+                    $room->update(['status' => RoomStatus::RESERVED]);
+                } elseif ($newStatus === BookingStatus::CHECKED_IN) {
+                    $room->update(['status' => RoomStatus::OCCUPIED]);
+                } elseif ($newStatus === BookingStatus::CHECKED_OUT) {
+                    $room->update(['status' => RoomStatus::CLEANING]);
+                } elseif (in_array($newStatus, [BookingStatus::CANCELLED, BookingStatus::NO_SHOW])) {
+                    $room->update(['status' => RoomStatus::AVAILABLE]);
+                }
             }
 
             event(new BookingUpdated($booking));
@@ -179,7 +253,25 @@ class BookingService
     public function cancel(Booking $booking): Booking
     {
         return DB::transaction(function () use ($booking) {
+            $this->guardStatusTransition($booking, BookingStatus::CANCELLED);
+
+            // Enforce cancellation window
+            $cancellationHours = $booking->hotel->settings?->booking_cancellation_hours ?? 24;
+            $checkInTimeSetting = $booking->hotel->settings?->check_in_time ?? '14:00';
+            $scheduledCheckIn = Carbon::parse($booking->check_in_date->toDateString() . ' ' . $checkInTimeSetting);
+
+            if (now()->diffInHours($scheduledCheckIn, false) < $cancellationHours) {
+                throw ValidationException::withMessages([
+                    'status' => "The booking cannot be cancelled because the cancellation window of {$cancellationHours} hours has passed."
+                ]);
+            }
+
             $booking->update(['status' => BookingStatus::CANCELLED]);
+
+            // Release rooms
+            foreach ($booking->rooms as $room) {
+                $room->update(['status' => RoomStatus::AVAILABLE]);
+            }
 
             event(new BookingCancelled($booking));
 
@@ -193,12 +285,20 @@ class BookingService
     public function checkIn(Booking $booking): Booking
     {
         return DB::transaction(function () use ($booking) {
-            $booking->update(['status' => BookingStatus::CHECKED_IN]);
+            $this->guardStatusTransition($booking, BookingStatus::CHECKED_IN);
+
+            $booking->update([
+                'status' => BookingStatus::CHECKED_IN,
+                'actual_check_in_at' => now(),
+            ]);
 
             // Update room status
             foreach ($booking->rooms as $room) {
                 $room->update(['status' => RoomStatus::OCCUPIED]);
             }
+
+            // Regenerate invoice to apply early check-in fees if applicable
+            app(\App\Services\Billing\BillingService::class)->regenerateInvoice($booking);
 
             event(new BookingCheckedIn($booking));
 
@@ -212,7 +312,12 @@ class BookingService
     public function checkOut(Booking $booking): Booking
     {
         return DB::transaction(function () use ($booking) {
-            $booking->update(['status' => BookingStatus::CHECKED_OUT]);
+            $this->guardStatusTransition($booking, BookingStatus::CHECKED_OUT);
+
+            $booking->update([
+                'status' => BookingStatus::CHECKED_OUT,
+                'actual_check_out_at' => now(),
+            ]);
 
             // Update room status to cleaning and create housekeeping task
             foreach ($booking->rooms as $room) {
@@ -225,9 +330,73 @@ class BookingService
                 ]);
             }
 
+            // Regenerate invoice to apply late check-out fees if applicable
+            app(\App\Services\Billing\BillingService::class)->regenerateInvoice($booking);
+
             event(new BookingCheckedOut($booking));
 
             return $booking->fresh();
         });
+    }
+
+    /**
+     * Mark booking as no-show.
+     */
+    public function noShow(Booking $booking): Booking
+    {
+        return DB::transaction(function () use ($booking) {
+            $this->guardStatusTransition($booking, BookingStatus::NO_SHOW);
+
+            $booking->update(['status' => BookingStatus::NO_SHOW]);
+
+            // Release rooms
+            foreach ($booking->rooms as $room) {
+                $room->update(['status' => RoomStatus::AVAILABLE]);
+            }
+
+            // Dispatch an event (we can use booking updated or register a dedicated one if needed)
+            event(new BookingUpdated($booking));
+
+            return $booking->fresh();
+        });
+    }
+
+    /**
+     * Guard that validates if transition from old status to new status is allowed.
+     */
+    protected function guardStatusTransition(Booking $booking, string $newStatus): void
+    {
+        $oldStatus = $booking->status;
+
+        if ($oldStatus === $newStatus) {
+            return;
+        }
+
+        $allowed = [
+            BookingStatus::PENDING => [
+                BookingStatus::CONFIRMED,
+                BookingStatus::CANCELLED,
+                BookingStatus::CHECKED_IN,
+                BookingStatus::NO_SHOW,
+            ],
+            BookingStatus::CONFIRMED => [
+                BookingStatus::CHECKED_IN,
+                BookingStatus::CANCELLED,
+                BookingStatus::NO_SHOW,
+            ],
+            BookingStatus::CHECKED_IN => [
+                BookingStatus::CHECKED_OUT,
+            ],
+            // Terminal states:
+            BookingStatus::CHECKED_OUT => [],
+            BookingStatus::CANCELLED => [],
+            BookingStatus::NO_SHOW => [],
+        ];
+
+        if (!in_array($newStatus, $allowed[$oldStatus] ?? [])) {
+            throw ValidationException::withMessages([
+                'status' => "Invalid status transition from '{$oldStatus}' to '{$newStatus}'."
+            ]);
+        }
     }
 }
