@@ -46,7 +46,7 @@ class BookingLifecycleTest extends ApiTestCase
 
     public function test_booking_lifecycle_transitions(): void
     {
-        $user = $this->actingAsRole('hotel_manager');
+        $user = $this->actingAsRole('super_admin');
         $hotel = $this->createHotelForUser($user);
         $guest = Guest::factory()->create();
         $roomType = RoomType::factory()->create(['hotel_id' => $hotel->id]);
@@ -93,7 +93,7 @@ class BookingLifecycleTest extends ApiTestCase
 
     public function test_no_show_transitions_status_and_releases_room(): void
     {
-        $user = $this->actingAsRole('hotel_manager');
+        $user = $this->actingAsRole('super_admin');
         $hotel = $this->createHotelForUser($user);
         $guest = Guest::factory()->create();
         $roomType = RoomType::factory()->create(['hotel_id' => $hotel->id]);
