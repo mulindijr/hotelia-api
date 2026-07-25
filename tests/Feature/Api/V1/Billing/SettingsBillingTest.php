@@ -22,7 +22,8 @@ class SettingsBillingTest extends ApiTestCase
         $hotel = $this->createHotelForUser($user);
 
         // Set settings
-        $hotel->settings()->update([
+        $settings = app(\App\Services\Hotel\HotelSettingService::class)->getSettings($hotel);
+        app(\App\Services\Hotel\HotelSettingService::class)->update($settings, [
             'check_in_time' => '14:00',
             'early_checkin_fee' => 50.00,
         ]);
@@ -73,7 +74,8 @@ class SettingsBillingTest extends ApiTestCase
         $hotel = $this->createHotelForUser($user);
 
         // Set settings
-        $hotel->settings()->update([
+        $settings = app(\App\Services\Hotel\HotelSettingService::class)->getSettings($hotel);
+        app(\App\Services\Hotel\HotelSettingService::class)->update($settings, [
             'check_out_time' => '11:00',
             'default_checkout_grace_minutes' => 30,
             'late_checkout_fee' => 75.00,
