@@ -63,6 +63,11 @@ class UpdateBookingRequest extends FormRequest
                 return;
             }
 
+            $hotel = $this->route('hotel');
+            if ($hotel?->settings?->allow_overbooking) {
+                return;
+            }
+
             // Only run overlap check if rooms and dates are provided
             $booking = $this->route('booking');
             $bookingId = $booking?->id;
