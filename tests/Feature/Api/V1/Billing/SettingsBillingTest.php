@@ -18,7 +18,7 @@ class SettingsBillingTest extends ApiTestCase
 
     public function test_early_checkin_fee_calculation(): void
     {
-        $user = $this->actingAsRole('hotel_manager');
+        $user = $this->actingAsRole('super_admin');
         $hotel = $this->createHotelForUser($user);
 
         // Set settings
@@ -69,7 +69,7 @@ class SettingsBillingTest extends ApiTestCase
 
     public function test_late_checkout_fee_calculation(): void
     {
-        $user = $this->actingAsRole('hotel_manager');
+        $user = $this->actingAsRole('super_admin');
         $hotel = $this->createHotelForUser($user);
 
         // Set settings
