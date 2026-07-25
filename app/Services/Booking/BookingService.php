@@ -255,15 +255,17 @@ class BookingService
         return DB::transaction(function () use ($booking) {
             $this->guardStatusTransition($booking, BookingStatus::CANCELLED);
 
-            // Enforce cancellation window
-            $cancellationHours = $booking->hotel->settings?->booking_cancellation_hours ?? 24;
-            $checkInTimeSetting = $booking->hotel->settings?->check_in_time ?? '14:00';
-            $scheduledCheckIn = Carbon::parse($booking->check_in_date->toDateString() . ' ' . $checkInTimeSetting);
+            // Enforce cancellation window for confirmed bookings
+            if ($booking->status === BookingStatus::CONFIRMED) {
+                $cancellationHours = $booking->hotel->settings?->booking_cancellation_hours ?? 24;
+                $checkInTimeSetting = $booking->hotel->settings?->check_in_time ?? '14:00';
+                $scheduledCheckIn = Carbon::parse($booking->check_in_date->toDateString() . ' ' . $checkInTimeSetting);
 
-            if (now()->diffInHours($scheduledCheckIn, false) < $cancellationHours) {
-                throw ValidationException::withMessages([
-                    'status' => "The booking cannot be cancelled because the cancellation window of {$cancellationHours} hours has passed."
-                ]);
+                if (now()->diffInHours($scheduledCheckIn, false) < $cancellationHours) {
+                    throw ValidationException::withMessages([
+                        'status' => "The booking cannot be cancelled because the cancellation window of {$cancellationHours} hours has passed."
+                    ]);
+                }
             }
 
             $booking->update(['status' => BookingStatus::CANCELLED]);
