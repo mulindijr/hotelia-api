@@ -95,4 +95,16 @@ class BookingPolicy
 
         return $user->belongsToHotel($booking->hotel_id);
     }
+
+    /**
+     * Determine whether the user can mark booking as no-show.
+     */
+    public function noShow(User $user, Booking $booking, ?Hotel $hotel = null): bool
+    {
+        if ($hotel && (int) $booking->hotel_id !== (int) $hotel->id) {
+            return false;
+        }
+
+        return $user->belongsToHotel($booking->hotel_id);
+    }
 }
