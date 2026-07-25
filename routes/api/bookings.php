@@ -12,4 +12,5 @@ Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/bookings')->scopeBin
     Route::post('/{booking}/cancel', [BookingController::class, 'cancel'])->middleware('permission:' . Permissions::CANCEL_BOOKINGS)->name('bookings.cancel');
     Route::post('/{booking}/check-in', [BookingController::class, 'checkIn'])->middleware('permission:' . Permissions::CHECK_IN_GUESTS)->name('bookings.check-in');
     Route::post('/{booking}/check-out', [BookingController::class, 'checkOut'])->middleware('permission:' . Permissions::CHECK_OUT_GUESTS)->name('bookings.check-out');
+    Route::post('/{booking}/no-show', [BookingController::class, 'noShow'])->middleware('permission:' . Permissions::CANCEL_BOOKINGS)->name('bookings.no-show');
 });
