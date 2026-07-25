@@ -127,7 +127,8 @@ class BookingLifecycleTest extends ApiTestCase
         $hotel = $this->createHotelForUser($user);
         
         // Disable overbooking
-        $hotel->settings()->update(['allow_overbooking' => false]);
+        $settings = app(\App\Services\Hotel\HotelSettingService::class)->getSettings($hotel);
+        app(\App\Services\Hotel\HotelSettingService::class)->update($settings, ['allow_overbooking' => false]);
 
         $guest1 = Guest::factory()->create();
         $guest2 = Guest::factory()->create();
@@ -156,7 +157,8 @@ class BookingLifecycleTest extends ApiTestCase
         ])->assertStatus(422);
 
         // Enable overbooking
-        $hotel->settings()->update(['allow_overbooking' => true]);
+        $settings = app(\App\Services\Hotel\HotelSettingService::class)->getSettings($hotel);
+        app(\App\Services\Hotel\HotelSettingService::class)->update($settings, ['allow_overbooking' => true]);
 
         // Create booking 2 overlapping again -> should succeed and flag is_overbooked as true
         $response = $this->postJson(route('bookings.store', $hotel), [
@@ -176,7 +178,8 @@ class BookingLifecycleTest extends ApiTestCase
         $user = $this->actingAsRole('hotel_manager');
         $hotel = $this->createHotelForUser($user);
         
-        $hotel->settings()->update([
+        $settings = app(\App\Services\Hotel\HotelSettingService::class)->getSettings($hotel);
+        app(\App\Services\Hotel\HotelSettingService::class)->update($settings, [
             'booking_cancellation_hours' => 24,
             'check_in_time' => '14:00',
         ]);
