@@ -63,6 +63,11 @@ class StoreBookingRequest extends FormRequest
                 return;
             }
 
+            $hotel = $this->route('hotel');
+            if ($hotel?->settings?->allow_overbooking) {
+                return;
+            }
+
             $checkIn = $this->input('check_in_date');
             $checkOut = $this->input('check_out_date');
             $roomIds = $this->input('rooms');
