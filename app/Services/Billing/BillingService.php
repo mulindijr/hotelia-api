@@ -73,6 +73,42 @@ class BillingService
                 ];
             }
 
+            // 3.5. Add early check-in and late check-out fees if applicable
+            if ($booking->actual_check_in_at) {
+                $actualCheckIn = Carbon::parse($booking->actual_check_in_at);
+                $scheduledCheckInLimit = Carbon::parse($booking->check_in_date->toDateString() . ' ' . ($hotel->settings?->check_in_time ?? '14:00'));
+                if ($actualCheckIn->lt($scheduledCheckInLimit)) {
+                    $earlyFee = $hotel->settings?->early_checkin_fee ?? 0.00;
+                    if ($earlyFee > 0) {
+                        $subtotal += $earlyFee;
+                        $itemsData[] = [
+                            'description' => "Early Check-in Fee",
+                            'quantity' => 1,
+                            'unit_price' => $earlyFee,
+                            'total_price' => $earlyFee,
+                        ];
+                    }
+                }
+            }
+
+            if ($booking->actual_check_out_at) {
+                $actualCheckOut = Carbon::parse($booking->actual_check_out_at);
+                $scheduledCheckOutLimit = Carbon::parse($booking->check_out_date->toDateString() . ' ' . ($hotel->settings?->check_out_time ?? '11:00'))
+                    ->addMinutes($hotel->settings?->default_checkout_grace_minutes ?? 0);
+                if ($actualCheckOut->gt($scheduledCheckOutLimit)) {
+                    $lateFee = $hotel->settings?->late_checkout_fee ?? 0.00;
+                    if ($lateFee > 0) {
+                        $subtotal += $lateFee;
+                        $itemsData[] = [
+                            'description' => "Late Check-out Fee",
+                            'quantity' => 1,
+                            'unit_price' => $lateFee,
+                            'total_price' => $lateFee,
+                        ];
+                    }
+                }
+            }
+
             $taxAmount = $subtotal * ($taxRate / 100);
             $totalAmount = $subtotal + $taxAmount;
 
