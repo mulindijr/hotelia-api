@@ -14,6 +14,7 @@ use App\Models\Hotel;
 use App\Models\HousekeepingTask;
 use App\Models\Room;
 use App\Models\Service;
+use App\Services\Hotel\HotelSettingService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -51,9 +52,11 @@ class BookingService
                 })
                 ->exists();
 
+            $settings = app(HotelSettingService::class)->getSettings($hotel);
+
             $isOverbooked = false;
             if ($conflictingBookings) {
-                $allowOverbooking = $hotel->settings?->allow_overbooking ?? false;
+                $allowOverbooking = $settings->allow_overbooking ?? false;
                 if (!$allowOverbooking) {
                     throw ValidationException::withMessages([
                         'rooms' => 'One or more selected rooms are no longer available for the selected date range.',
@@ -63,7 +66,7 @@ class BookingService
             }
 
             // 3. Generate unique booking reference
-            $prefix = $hotel->settings?->booking_prefix ?? 'BK-';
+            $prefix = $settings->booking_prefix ?? 'BK-';
             do {
                 $ref = $prefix . date('Ymd') . strtoupper(Str::random(4));
             } while (Booking::where('booking_reference', $ref)->exists());
@@ -169,9 +172,11 @@ class BookingService
                 })
                 ->exists();
 
+            $settings = app(HotelSettingService::class)->getSettings($booking->hotel);
+
             $isOverbooked = $booking->is_overbooked;
             if ($conflictingBookings) {
-                $allowOverbooking = $booking->hotel->settings?->allow_overbooking ?? false;
+                $allowOverbooking = $settings->allow_overbooking ?? false;
                 if (!$allowOverbooking) {
                     throw ValidationException::withMessages([
                         'rooms' => 'One or more selected rooms are no longer available for the selected date range.',
@@ -257,8 +262,9 @@ class BookingService
 
             // Enforce cancellation window for confirmed bookings
             if ($booking->status === BookingStatus::CONFIRMED) {
-                $cancellationHours = $booking->hotel->settings?->booking_cancellation_hours ?? 24;
-                $checkInTimeSetting = $booking->hotel->settings?->check_in_time ?? '14:00';
+                $settings = app(HotelSettingService::class)->getSettings($booking->hotel);
+                $cancellationHours = $settings->booking_cancellation_hours ?? 24;
+                $checkInTimeSetting = $settings->check_in_time ?? '14:00';
                 $scheduledCheckIn = Carbon::parse($booking->check_in_date->toDateString() . ' ' . $checkInTimeSetting);
 
                 if (now()->diffInHours($scheduledCheckIn, false) < $cancellationHours) {
