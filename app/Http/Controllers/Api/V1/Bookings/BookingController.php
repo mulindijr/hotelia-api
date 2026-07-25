@@ -217,4 +217,30 @@ class BookingController extends Controller
             'data' => new BookingResource($checkedOutBooking->load(['guest', 'rooms.roomType', 'services'])),
         ]);
     }
+
+    #[OA\Post(
+        path: "/api/v1/hotels/{hotel}/bookings/{booking}/no-show",
+        summary: "Mark booking as no-show and release rooms",
+        tags: ["Bookings"],
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
+            new OA\Parameter(name: "booking", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Booking marked as no-show successfully")
+        ]
+    )]
+    public function noShow(Hotel $hotel, Booking $booking): JsonResponse
+    {
+        $this->authorize('noShow', [$booking, $hotel]);
+
+        $noShowBooking = $this->bookingService->noShow($booking);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Booking Marked as No-Show Successfully.',
+            'data' => new BookingResource($noShowBooking->load(['guest', 'rooms.roomType', 'services'])),
+        ]);
+    }
 }
