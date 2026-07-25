@@ -25,12 +25,18 @@ class Booking extends Model
         'total_amount',
         'status',
         'notes',
+        'actual_check_in_at',
+        'actual_check_out_at',
+        'is_overbooked',
     ];
 
     protected $casts = [
         'check_in_date' => 'date',
         'check_out_date' => 'date',
         'total_amount' => 'decimal:2',
+        'actual_check_in_at' => 'datetime',
+        'actual_check_out_at' => 'datetime',
+        'is_overbooked' => 'boolean',
     ];
 
     public function hotel()
