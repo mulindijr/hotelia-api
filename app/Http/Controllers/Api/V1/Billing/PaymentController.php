@@ -39,17 +39,10 @@ class PaymentController extends Controller
             ->latest()
             ->paginate($request->query('per_page', 15));
 
-        return response()->json([
+        return PaymentResource::collection($payments)->additional([
             'success' => true,
             'message' => 'Payments Retrieved Successfully.',
-            'data' => PaymentResource::collection($payments->items()),
-            'meta' => [
-                'current_page' => $payments->currentPage(),
-                'last_page' => $payments->lastPage(),
-                'per_page' => $payments->perPage(),
-                'total' => $payments->total(),
-            ],
-        ]);
+        ])->response();
     }
 
     /**
