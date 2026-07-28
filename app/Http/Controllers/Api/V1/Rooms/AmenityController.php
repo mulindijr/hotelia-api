@@ -11,6 +11,9 @@ use App\Services\Room\AmenityService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
+
 class AmenityController extends Controller
 {
     use AuthorizesRequests;
@@ -22,16 +25,26 @@ class AmenityController extends Controller
     /**
      * Display a listing of amenities.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Amenity::class);
 
-        $amenities = Amenity::all();
+        $amenities = QueryBuilder::for(Amenity::class)
+            ->allowedFilters(...[
+                'name',
+            ])
+            ->paginate($request->query('per_page', 15));
 
         return response()->json([
             'success' => true,
             'message' => 'Amenities Retrieved Successfully.',
-            'data' => AmenityResource::collection($amenities),
+            'data' => AmenityResource::collection($amenities->items()),
+            'meta' => [
+                'current_page' => $amenities->currentPage(),
+                'last_page' => $amenities->lastPage(),
+                'per_page' => $amenities->perPage(),
+                'total' => $amenities->total(),
+            ],
         ]);
     }
 
