@@ -48,7 +48,7 @@ class HousekeepingController extends Controller
 
         $tasks = QueryBuilder::for(HousekeepingTask::class)
             ->whereIn('room_id', $roomIds)
-            ->allowedFilters([
+            ->allowedFilters(...[
                 'status',
                 'assigned_to',
                 'room_id',
