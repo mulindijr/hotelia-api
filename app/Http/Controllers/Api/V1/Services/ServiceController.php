@@ -38,17 +38,10 @@ class ServiceController extends Controller
             ])
             ->paginate($request->query('per_page', 15));
 
-        return response()->json([
+        return ServiceResource::collection($services)->additional([
             'success' => true,
             'message' => 'Services Retrieved Successfully.',
-            'data' => ServiceResource::collection($services->items()),
-            'meta' => [
-                'current_page' => $services->currentPage(),
-                'last_page' => $services->lastPage(),
-                'per_page' => $services->perPage(),
-                'total' => $services->total(),
-            ],
-        ]);
+        ])->response();
     }
 
     /**
