@@ -32,7 +32,7 @@ class PaymentController extends Controller
 
         $payments = QueryBuilder::for(Payment::class)
             ->where('booking_id', $booking->id)
-            ->allowedFilters([
+            ->allowedFilters(...[
                 'status',
                 'payment_method',
             ])
