@@ -56,17 +56,10 @@ class MaintenanceController extends Controller
             ->with('room')
             ->paginate($request->query('per_page', 15));
 
-        return response()->json([
+        return MaintenanceRequestResource::collection($requests)->additional([
             'success' => true,
             'message' => 'Maintenance Requests Retrieved Successfully.',
-            'data' => MaintenanceRequestResource::collection($requests->items()),
-            'meta' => [
-                'current_page' => $requests->currentPage(),
-                'last_page' => $requests->lastPage(),
-                'per_page' => $requests->perPage(),
-                'total' => $requests->total(),
-            ],
-        ]);
+        ])->response();
     }
 
     #[OA\Post(
