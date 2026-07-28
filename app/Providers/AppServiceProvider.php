@@ -51,6 +51,10 @@ class AppServiceProvider extends ServiceProvider
             \App\Events\Bookings\BookingUpdated::class,
             \App\Listeners\Bookings\SendGuestBookingMailNotification::class
         );
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\Bookings\BookingUpdated::class,
+            \App\Listeners\Bookings\SendBookingNotification::class
+        );
 
         \Illuminate\Support\Facades\Event::listen(
             \App\Events\Bookings\BookingCheckedIn::class,
@@ -69,7 +73,19 @@ class AppServiceProvider extends ServiceProvider
             \App\Listeners\Housekeeping\SendHousekeepingTaskNotification::class
         );
         \Illuminate\Support\Facades\Event::listen(
+            \App\Events\Housekeeping\HousekeepingTaskDeleted::class,
+            \App\Listeners\Housekeeping\SendHousekeepingTaskNotification::class
+        );
+        \Illuminate\Support\Facades\Event::listen(
             \App\Events\Maintenance\MaintenanceRequestCreated::class,
+            \App\Listeners\Maintenance\SendMaintenanceRequestNotification::class
+        );
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\Maintenance\MaintenanceRequestUpdated::class,
+            \App\Listeners\Maintenance\SendMaintenanceRequestNotification::class
+        );
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\Maintenance\MaintenanceRequestDeleted::class,
             \App\Listeners\Maintenance\SendMaintenanceRequestNotification::class
         );
         \Illuminate\Support\Facades\Event::listen(
