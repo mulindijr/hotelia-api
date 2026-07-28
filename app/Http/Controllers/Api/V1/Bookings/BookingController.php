@@ -59,17 +59,10 @@ class BookingController extends Controller
             ->with(['guest', 'rooms.roomType', 'services'])
             ->paginate($request->query('per_page', 15));
 
-        return response()->json([
+        return BookingResource::collection($bookings)->additional([
             'success' => true,
             'message' => 'Bookings Retrieved Successfully.',
-            'data' => BookingResource::collection($bookings->items()),
-            'meta' => [
-                'current_page' => $bookings->currentPage(),
-                'last_page' => $bookings->lastPage(),
-                'per_page' => $bookings->perPage(),
-                'total' => $bookings->total(),
-            ],
-        ]);
+        ])->response();
     }
 
     #[OA\Post(
