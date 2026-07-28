@@ -56,17 +56,10 @@ class HousekeepingController extends Controller
             ->with(['room', 'assignedTo'])
             ->paginate($request->query('per_page', 15));
 
-        return response()->json([
+        return HousekeepingTaskResource::collection($tasks)->additional([
             'success' => true,
             'message' => 'Housekeeping Tasks Retrieved Successfully.',
-            'data' => HousekeepingTaskResource::collection($tasks->items()),
-            'meta' => [
-                'current_page' => $tasks->currentPage(),
-                'last_page' => $tasks->lastPage(),
-                'per_page' => $tasks->perPage(),
-                'total' => $tasks->total(),
-            ],
-        ]);
+        ])->response();
     }
 
     #[OA\Post(
