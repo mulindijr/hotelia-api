@@ -34,9 +34,24 @@ class AppServiceProvider extends ServiceProvider
             \App\Listeners\Bookings\SendBookingNotification::class
         );
         \Illuminate\Support\Facades\Event::listen(
+            \App\Events\Bookings\BookingCreated::class,
+            \App\Listeners\Bookings\SendGuestBookingMailNotification::class
+        );
+
+        \Illuminate\Support\Facades\Event::listen(
             \App\Events\Bookings\BookingCancelled::class,
             \App\Listeners\Bookings\SendBookingNotification::class
         );
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\Bookings\BookingCancelled::class,
+            \App\Listeners\Bookings\SendGuestBookingMailNotification::class
+        );
+
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\Bookings\BookingUpdated::class,
+            \App\Listeners\Bookings\SendGuestBookingMailNotification::class
+        );
+
         \Illuminate\Support\Facades\Event::listen(
             \App\Events\Bookings\BookingCheckedIn::class,
             \App\Listeners\Bookings\SendBookingNotification::class
