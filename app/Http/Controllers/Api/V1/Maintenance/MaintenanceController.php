@@ -53,7 +53,7 @@ class MaintenanceController extends Controller
                 'priority',
                 'room_id',
             ])
-            ->with(['room', 'assignedTo'])
+            ->with('room')
             ->paginate($request->query('per_page', 15));
 
         return response()->json([
