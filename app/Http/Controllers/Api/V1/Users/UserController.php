@@ -40,17 +40,10 @@ class UserController extends Controller
             ->with('roles')
             ->paginate($request->query('per_page', 15));
 
-        return response()->json([
+        return UserResource::collection($users)->additional([
             'success' => true,
             'message' => 'Staff users retrieved successfully.',
-            'data' => UserResource::collection($users->items()),
-            'meta' => [
-                'current_page' => $users->currentPage(),
-                'last_page' => $users->lastPage(),
-                'per_page' => $users->perPage(),
-                'total' => $users->total(),
-            ],
-        ]);
+        ])->response();
     }
 
     /**
