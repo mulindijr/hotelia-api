@@ -148,7 +148,10 @@ class BillingService
             // Recalculate status
             $this->recalculateInvoiceStatus($booking);
 
-            return $invoice->fresh('items');
+            $freshInvoice = $invoice->fresh('items');
+            event(new \App\Events\Billing\InvoiceGenerated($freshInvoice));
+
+            return $freshInvoice;
         });
     }
 
@@ -206,6 +209,11 @@ class BillingService
             $status = 'partial';
         }
 
+        $oldStatus = $invoice->status;
         $invoice->update(['status' => $status]);
+
+        if ($status === 'paid' && $oldStatus !== 'paid') {
+            event(new \App\Events\Billing\InvoicePaid($invoice));
+        }
     }
 }

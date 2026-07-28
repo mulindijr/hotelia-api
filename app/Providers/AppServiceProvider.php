@@ -72,6 +72,14 @@ class AppServiceProvider extends ServiceProvider
             \App\Events\Maintenance\MaintenanceRequestCreated::class,
             \App\Listeners\Maintenance\SendMaintenanceRequestNotification::class
         );
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\Billing\InvoiceGenerated::class,
+            \App\Listeners\Billing\SendInvoiceNotification::class
+        );
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\Billing\InvoicePaid::class,
+            \App\Listeners\Billing\SendInvoiceNotification::class
+        );
     }
 
     /**
