@@ -46,7 +46,7 @@ class BookingController extends Controller
 
         $bookings = QueryBuilder::for(Booking::class)
             ->where('hotel_id', $hotel->id)
-            ->allowedFilters([
+            ->allowedFilters(...[
                 'status',
                 'guest_id',
                 AllowedFilter::callback('check_in_date', function ($query, $value) {
