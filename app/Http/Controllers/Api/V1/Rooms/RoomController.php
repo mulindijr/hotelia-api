@@ -45,7 +45,7 @@ class RoomController extends Controller
 
         $rooms = QueryBuilder::for(Room::class)
             ->where('hotel_id', $hotel->id)
-            ->allowedFilters([
+            ->allowedFilters(...[
                 'status',
                 'room_type_id',
             ])
