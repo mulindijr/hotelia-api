@@ -13,6 +13,8 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+use Spatie\QueryBuilder\QueryBuilder;
+
 class ServiceController extends Controller
 {
     use AuthorizesRequests;
@@ -28,12 +30,24 @@ class ServiceController extends Controller
     {
         $this->authorize('viewAny', [Service::class, $hotel]);
 
-        $services = $this->ancillaryService->getServices($hotel);
+        $services = QueryBuilder::for(Service::class)
+            ->where('hotel_id', $hotel->id)
+            ->allowedFilters([
+                'name',
+                'is_active',
+            ])
+            ->paginate($request->query('per_page', 15));
 
         return response()->json([
             'success' => true,
             'message' => 'Services Retrieved Successfully.',
-            'data' => ServiceResource::collection($services),
+            'data' => ServiceResource::collection($services->items()),
+            'meta' => [
+                'current_page' => $services->currentPage(),
+                'last_page' => $services->lastPage(),
+                'per_page' => $services->perPage(),
+                'total' => $services->total(),
+            ],
         ]);
     }
 
