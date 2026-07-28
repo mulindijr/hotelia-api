@@ -76,7 +76,7 @@ class BookingEmailNotificationTest extends ApiTestCase
             'check_in_date' => now()->addDays(2),
             'check_out_date' => now()->addDays(4),
         ]);
-        $booking->rooms()->attach($room->id, ['price_per_night' => $roomType->price_per_night]);
+        $booking->rooms()->attach($room->id, ['price_per_night' => $roomType->base_price]);
 
         $response = $this->putJson(route('bookings.update', [$hotel, $booking]), [
             'check_in_date' => now()->addDays(3)->toDateString(),
@@ -115,7 +115,7 @@ class BookingEmailNotificationTest extends ApiTestCase
             'check_in_date' => now()->addDays(5),
             'check_out_date' => now()->addDays(7),
         ]);
-        $booking->rooms()->attach($room->id, ['price_per_night' => $roomType->price_per_night]);
+        $booking->rooms()->attach($room->id, ['price_per_night' => $roomType->base_price]);
 
         $response = $this->postJson(route('bookings.cancel', [$hotel, $booking]));
 
@@ -150,7 +150,7 @@ class BookingEmailNotificationTest extends ApiTestCase
             'check_in_date' => now()->subDays(1),
             'check_out_date' => now()->addDays(2),
         ]);
-        $booking->rooms()->attach($room->id, ['price_per_night' => $roomType->price_per_night]);
+        $booking->rooms()->attach($room->id, ['price_per_night' => $roomType->base_price]);
 
         $response = $this->postJson(route('bookings.no-show', [$hotel, $booking]));
 
