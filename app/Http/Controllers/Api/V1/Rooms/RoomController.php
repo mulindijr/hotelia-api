@@ -52,17 +52,10 @@ class RoomController extends Controller
             ->with('roomType')
             ->paginate($request->query('per_page', 15));
 
-        return response()->json([
+        return RoomResource::collection($rooms)->additional([
             'success' => true,
             'message' => 'Rooms Retrieved Successfully.',
-            'data' => RoomResource::collection($rooms->items()),
-            'meta' => [
-                'current_page' => $rooms->currentPage(),
-                'last_page' => $rooms->lastPage(),
-                'per_page' => $rooms->perPage(),
-                'total' => $rooms->total(),
-            ],
-        ]);
+        ])->response();
     }
 
     #[OA\Post(
