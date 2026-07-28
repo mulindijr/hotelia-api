@@ -35,17 +35,10 @@ class AmenityController extends Controller
             ])
             ->paginate($request->query('per_page', 15));
 
-        return response()->json([
+        return AmenityResource::collection($amenities)->additional([
             'success' => true,
             'message' => 'Amenities Retrieved Successfully.',
-            'data' => AmenityResource::collection($amenities->items()),
-            'meta' => [
-                'current_page' => $amenities->currentPage(),
-                'last_page' => $amenities->lastPage(),
-                'per_page' => $amenities->perPage(),
-                'total' => $amenities->total(),
-            ],
-        ]);
+        ])->response();
     }
 
     /**
