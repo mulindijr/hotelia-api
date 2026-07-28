@@ -48,7 +48,7 @@ class MaintenanceController extends Controller
 
         $requests = QueryBuilder::for(MaintenanceRequest::class)
             ->whereIn('room_id', $roomIds)
-            ->allowedFilters([
+            ->allowedFilters(...[
                 'status',
                 'priority',
                 'room_id',
