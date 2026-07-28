@@ -32,7 +32,7 @@ class ServiceController extends Controller
 
         $services = QueryBuilder::for(Service::class)
             ->where('hotel_id', $hotel->id)
-            ->allowedFilters([
+            ->allowedFilters(...[
                 'name',
                 'is_active',
             ])
