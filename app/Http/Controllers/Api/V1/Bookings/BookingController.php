@@ -15,6 +15,9 @@ use Illuminate\Http\Request;
 
 use OpenApi\Attributes as OA;
 
+use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
+
 #[OA\Tag(name: "Bookings", description: "Reservation management, check-in, check-out, and cancellation endpoints")]
 class BookingController extends Controller
 {
@@ -41,12 +44,31 @@ class BookingController extends Controller
     {
         $this->authorize('viewAny', [Booking::class, $hotel]);
 
-        $bookings = $hotel->bookings()->with(['guest', 'rooms.roomType', 'services'])->get();
+        $bookings = QueryBuilder::for(Booking::class)
+            ->where('hotel_id', $hotel->id)
+            ->allowedFilters([
+                'status',
+                'guest_id',
+                AllowedFilter::callback('check_in_date', function ($query, $value) {
+                    $query->where('check_in_date', '>=', $value);
+                }),
+                AllowedFilter::callback('check_out_date', function ($query, $value) {
+                    $query->where('check_out_date', '<=', $value);
+                }),
+            ])
+            ->with(['guest', 'rooms.roomType', 'services'])
+            ->paginate($request->query('per_page', 15));
 
         return response()->json([
             'success' => true,
             'message' => 'Bookings Retrieved Successfully.',
-            'data' => BookingResource::collection($bookings),
+            'data' => BookingResource::collection($bookings->items()),
+            'meta' => [
+                'current_page' => $bookings->currentPage(),
+                'last_page' => $bookings->lastPage(),
+                'per_page' => $bookings->perPage(),
+                'total' => $bookings->total(),
+            ],
         ]);
     }
 
