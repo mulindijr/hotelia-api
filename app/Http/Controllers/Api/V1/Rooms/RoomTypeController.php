@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 
 use OpenApi\Attributes as OA;
 
+use Spatie\QueryBuilder\QueryBuilder;
+
 #[OA\Tag(name: "Room Types", description: "Room type categories and pricing management")]
 class RoomTypeController extends Controller
 {
@@ -41,12 +43,24 @@ class RoomTypeController extends Controller
     {
         $this->authorize('viewAny', [RoomType::class, $hotel]);
 
-        $roomTypes = $this->roomTypeService->getRoomTypes($hotel);
+        $roomTypes = QueryBuilder::for(RoomType::class)
+            ->where('hotel_id', $hotel->id)
+            ->allowedFilters([
+                'name',
+            ])
+            ->with('amenities')
+            ->paginate($request->query('per_page', 15));
 
         return response()->json([
             'success' => true,
             'message' => 'Room Types Retrieved Successfully.',
-            'data' => RoomTypeResource::collection($roomTypes),
+            'data' => RoomTypeResource::collection($roomTypes->items()),
+            'meta' => [
+                'current_page' => $roomTypes->currentPage(),
+                'last_page' => $roomTypes->lastPage(),
+                'per_page' => $roomTypes->perPage(),
+                'total' => $roomTypes->total(),
+            ],
         ]);
     }
 
