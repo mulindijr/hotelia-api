@@ -12,6 +12,8 @@ use App\Models\Payment;
 use App\Services\Billing\BillingService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class PaymentController extends Controller
 {
@@ -24,16 +26,29 @@ class PaymentController extends Controller
     /**
      * Display a listing of payments logged for a booking.
      */
-    public function index(Hotel $hotel, Booking $booking): JsonResponse
+    public function index(Request $request, Hotel $hotel, Booking $booking): JsonResponse
     {
         $this->authorize('view', [$booking, $hotel]);
 
-        $payments = $booking->payments()->latest()->get();
+        $payments = QueryBuilder::for(Payment::class)
+            ->where('booking_id', $booking->id)
+            ->allowedFilters([
+                'status',
+                'payment_method',
+            ])
+            ->latest()
+            ->paginate($request->query('per_page', 15));
 
         return response()->json([
             'success' => true,
             'message' => 'Payments Retrieved Successfully.',
-            'data' => PaymentResource::collection($payments),
+            'data' => PaymentResource::collection($payments->items()),
+            'meta' => [
+                'current_page' => $payments->currentPage(),
+                'last_page' => $payments->lastPage(),
+                'per_page' => $payments->perPage(),
+                'total' => $payments->total(),
+            ],
         ]);
     }
 
