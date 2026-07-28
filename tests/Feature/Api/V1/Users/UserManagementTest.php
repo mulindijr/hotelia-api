@@ -31,20 +31,24 @@ class UserManagementTest extends ApiTestCase
             ->assertJsonPath('success', true)
             ->assertJsonStructure([
                 'data' => [
-                    'data' => [
-                        '*' => [
-                            'id',
-                            'first_name',
-                            'last_name',
-                            'full_name',
-                            'email',
-                            'phone',
-                            'is_active',
-                            'roles',
-                            'created_at',
-                            'updated_at',
-                        ]
+                    '*' => [
+                        'id',
+                        'first_name',
+                        'last_name',
+                        'full_name',
+                        'email',
+                        'phone',
+                        'is_active',
+                        'roles',
+                        'created_at',
+                        'updated_at',
                     ]
+                ],
+                'meta' => [
+                    'current_page',
+                    'last_page',
+                    'per_page',
+                    'total',
                 ]
             ]);
     }
