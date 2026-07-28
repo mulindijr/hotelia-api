@@ -46,17 +46,10 @@ class GuestController extends Controller
             )
             ->paginate($request->query('per_page', 15));
 
-        return response()->json([
+        return GuestResource::collection($guests)->additional([
             'success' => true,
             'message' => 'Guests Retrieved Successfully.',
-            'data' => GuestResource::collection($guests->items()),
-            'meta' => [
-                'current_page' => $guests->currentPage(),
-                'last_page' => $guests->lastPage(),
-                'per_page' => $guests->perPage(),
-                'total' => $guests->total(),
-            ],
-        ]);
+        ])->response();
     }
 
     /**
