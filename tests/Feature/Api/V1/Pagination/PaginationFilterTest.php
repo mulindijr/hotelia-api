@@ -209,7 +209,7 @@ class PaginationFilterTest extends TestCase
                 'reported_by' => $this->user->id,
                 'description' => 'Fix something',
                 'priority' => $i % 2 === 0 ? 'high' : 'low',
-                'status' => 'pending',
+                'status' => 'open',
             ]);
         }
 
