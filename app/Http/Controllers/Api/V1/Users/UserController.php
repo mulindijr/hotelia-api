@@ -12,6 +12,9 @@ use App\Services\User\UserService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 
+use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
+
 class UserController extends Controller
 {
     use AuthorizesRequests;
@@ -23,16 +26,30 @@ class UserController extends Controller
     /**
      * Display a listing of the hotel's staff.
      */
-    public function index(Hotel $hotel): JsonResponse
+    public function index(Request $request, Hotel $hotel): JsonResponse
     {
         $this->authorize('view', $hotel);
 
-        $users = $hotel->users()->with('roles')->paginate(15);
+        $users = QueryBuilder::for(User::class)
+            ->whereHas('hotels', function ($q) use ($hotel) {
+                $q->where('hotels.id', $hotel->id);
+            })
+            ->allowedFilters(...[
+                'email',
+            ])
+            ->with('roles')
+            ->paginate($request->query('per_page', 15));
 
         return response()->json([
             'success' => true,
             'message' => 'Staff users retrieved successfully.',
-            'data' => UserResource::collection($users)->response()->getData(true),
+            'data' => UserResource::collection($users->items()),
+            'meta' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+            ],
         ]);
     }
 
