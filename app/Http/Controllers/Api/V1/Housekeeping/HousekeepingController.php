@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 
 use OpenApi\Attributes as OA;
 
+use Spatie\QueryBuilder\QueryBuilder;
+
 #[OA\Tag(name: "Housekeeping", description: "Room cleaning tasks and assignment operations")]
 class HousekeepingController extends Controller
 {
@@ -44,12 +46,26 @@ class HousekeepingController extends Controller
         // Retrieve rooms ids for this hotel
         $roomIds = $hotel->rooms()->pluck('id');
 
-        $tasks = HousekeepingTask::whereIn('room_id', $roomIds)->with('room')->get();
+        $tasks = QueryBuilder::for(HousekeepingTask::class)
+            ->whereIn('room_id', $roomIds)
+            ->allowedFilters([
+                'status',
+                'assigned_to',
+                'room_id',
+            ])
+            ->with(['room', 'assignedTo'])
+            ->paginate($request->query('per_page', 15));
 
         return response()->json([
             'success' => true,
             'message' => 'Housekeeping Tasks Retrieved Successfully.',
-            'data' => HousekeepingTaskResource::collection($tasks),
+            'data' => HousekeepingTaskResource::collection($tasks->items()),
+            'meta' => [
+                'current_page' => $tasks->currentPage(),
+                'last_page' => $tasks->lastPage(),
+                'per_page' => $tasks->perPage(),
+                'total' => $tasks->total(),
+            ],
         ]);
     }
 
