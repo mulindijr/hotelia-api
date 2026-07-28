@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 
 use OpenApi\Attributes as OA;
 
+use Spatie\QueryBuilder\QueryBuilder;
+
 #[OA\Tag(name: "Maintenance", description: "Room maintenance requests and issue tracking operations")]
 class MaintenanceController extends Controller
 {
@@ -44,12 +46,26 @@ class MaintenanceController extends Controller
         // Retrieve rooms ids for this hotel
         $roomIds = $hotel->rooms()->pluck('id');
 
-        $tasks = MaintenanceRequest::whereIn('room_id', $roomIds)->with('room')->get();
+        $requests = QueryBuilder::for(MaintenanceRequest::class)
+            ->whereIn('room_id', $roomIds)
+            ->allowedFilters([
+                'status',
+                'priority',
+                'room_id',
+            ])
+            ->with(['room', 'assignedTo'])
+            ->paginate($request->query('per_page', 15));
 
         return response()->json([
             'success' => true,
             'message' => 'Maintenance Requests Retrieved Successfully.',
-            'data' => MaintenanceRequestResource::collection($tasks),
+            'data' => MaintenanceRequestResource::collection($requests->items()),
+            'meta' => [
+                'current_page' => $requests->currentPage(),
+                'last_page' => $requests->lastPage(),
+                'per_page' => $requests->perPage(),
+                'total' => $requests->total(),
+            ],
         ]);
     }
 
