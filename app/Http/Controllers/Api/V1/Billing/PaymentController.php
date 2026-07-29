@@ -10,9 +10,11 @@ use App\Models\Booking;
 use App\Models\Hotel;
 use App\Models\Payment;
 use App\Services\Billing\BillingService;
+use App\Services\Pdf\PdfService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use OpenApi\Attributes as OA;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -22,8 +24,36 @@ class PaymentController extends Controller
     use AuthorizesRequests;
 
     public function __construct(
-        protected BillingService $billingService
+        protected BillingService $billingService,
+        protected PdfService $pdfService
     ) {}
+
+    #[OA\Get(
+        path: '/api/v1/hotels/{hotel}/bookings/{booking}/payments/{payment}/receipt/pdf',
+        summary: 'Download payment receipt as printable PDF',
+        tags: ['Billing'],
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(name: 'hotel', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'booking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'payment', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Payment receipt PDF file download', content: new OA\MediaType(mediaType: 'application/pdf')),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 404, description: 'Payment, Booking or Hotel not found'),
+        ]
+    )]
+    public function downloadReceiptPdf(Hotel $hotel, Booking $booking, Payment $payment): Response
+    {
+        $this->authorize('view', [$booking, $hotel]);
+
+        if ((int) $payment->booking_id !== (int) $booking->id) {
+            abort(404, 'Payment does not belong to the specified booking.');
+        }
+
+        return $this->pdfService->renderPaymentReceiptPdf($payment);
+    }
 
     #[OA\Get(
         path: '/api/v1/hotels/{hotel}/bookings/{booking}/payments',
