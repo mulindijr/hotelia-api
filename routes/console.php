@@ -13,4 +13,3 @@ Artisan::command('inspire', function () {
 // Schedule automated jobs every 15 minutes
 Schedule::job(new AutoCancelStaleBookings)->everyFifteenMinutes();
 Schedule::job(new NotifyStuckCleaningRooms)->everyFifteenMinutes();
-

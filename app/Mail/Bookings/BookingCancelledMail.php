@@ -20,7 +20,7 @@ class BookingCancelledMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Booking Cancellation - ' . $this->booking->booking_reference,
+            subject: 'Booking Cancellation - '.$this->booking->booking_reference,
         );
     }
 

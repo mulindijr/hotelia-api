@@ -24,7 +24,7 @@ class SendBookingNotification
         };
 
         $hotel = $booking->hotel;
-        if (!$hotel) {
+        if (! $hotel) {
             return;
         }
 

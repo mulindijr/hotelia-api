@@ -5,8 +5,6 @@ namespace Tests\Feature\Api\V1\Notifications;
 use App\Models\Booking;
 use App\Models\Guest;
 use App\Models\Hotel;
-use App\Models\HousekeepingTask;
-use App\Models\MaintenanceRequest;
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\User;

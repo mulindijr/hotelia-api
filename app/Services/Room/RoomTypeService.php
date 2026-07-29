@@ -3,8 +3,8 @@
 namespace App\Services\Room;
 
 use App\Events\Rooms\RoomTypeCreated;
-use App\Events\Rooms\RoomTypeUpdated;
 use App\Events\Rooms\RoomTypeDeleted;
+use App\Events\Rooms\RoomTypeUpdated;
 use App\Models\Hotel;
 use App\Models\RoomType;
 use Illuminate\Support\Facades\Cache;
@@ -34,7 +34,7 @@ class RoomTypeService
             /** @var RoomType $roomType */
             $roomType = $hotel->roomTypes()->create($data);
 
-            if (!empty($amenityIds)) {
+            if (! empty($amenityIds)) {
                 $roomType->amenities()->sync($amenityIds);
             }
 

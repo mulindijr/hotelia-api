@@ -5,9 +5,9 @@ namespace Tests\Feature\Api\V1\Billing;
 use App\Constants\BookingStatus;
 use App\Models\Booking;
 use App\Models\Guest;
-use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\RoomType;
+use App\Services\Hotel\HotelSettingService;
 use Carbon\Carbon;
 use Tests\ApiTestCase;
 use Tests\Traits\InteractsWithHotels;
@@ -22,8 +22,8 @@ class SettingsBillingTest extends ApiTestCase
         $hotel = $this->createHotelForUser($user);
 
         // Set settings
-        $settings = app(\App\Services\Hotel\HotelSettingService::class)->getSettings($hotel);
-        app(\App\Services\Hotel\HotelSettingService::class)->update($settings, [
+        $settings = app(HotelSettingService::class)->getSettings($hotel);
+        app(HotelSettingService::class)->update($settings, [
             'check_in_time' => '14:00',
             'early_checkin_fee' => 50.00,
         ]);
@@ -45,7 +45,7 @@ class SettingsBillingTest extends ApiTestCase
         $booking->rooms()->attach($room->id, ['price_per_night' => 100.00]);
 
         // Mock time to early check-in (10:00 AM on check-in day)
-        $earlyCheckInTime = Carbon::parse($booking->check_in_date->toDateString() . ' 10:00:00');
+        $earlyCheckInTime = Carbon::parse($booking->check_in_date->toDateString().' 10:00:00');
         Carbon::setTestNow($earlyCheckInTime);
 
         // Perform check-in
@@ -74,8 +74,8 @@ class SettingsBillingTest extends ApiTestCase
         $hotel = $this->createHotelForUser($user);
 
         // Set settings
-        $settings = app(\App\Services\Hotel\HotelSettingService::class)->getSettings($hotel);
-        app(\App\Services\Hotel\HotelSettingService::class)->update($settings, [
+        $settings = app(HotelSettingService::class)->getSettings($hotel);
+        app(HotelSettingService::class)->update($settings, [
             'check_out_time' => '11:00',
             'default_checkout_grace_minutes' => 30,
             'late_checkout_fee' => 75.00,
@@ -98,7 +98,7 @@ class SettingsBillingTest extends ApiTestCase
         $booking->rooms()->attach($room->id, ['price_per_night' => 100.00]);
 
         // Mock time to late check-out (12:00 PM on check-out day, which is > 11:30 grace window limit)
-        $lateCheckOutTime = Carbon::parse($booking->check_out_date->toDateString() . ' 12:00:00');
+        $lateCheckOutTime = Carbon::parse($booking->check_out_date->toDateString().' 12:00:00');
         Carbon::setTestNow($lateCheckOutTime);
 
         // Perform check-out

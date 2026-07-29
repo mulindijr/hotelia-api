@@ -5,8 +5,9 @@ namespace Tests\Unit\Policies;
 use App\Models\Guest;
 use App\Models\User;
 use App\Policies\GuestPolicy;
-use Tests\TestCase;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class GuestPolicyTest extends TestCase
 {
@@ -17,8 +18,8 @@ class GuestPolicyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->policy = new GuestPolicy();
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->policy = new GuestPolicy;
     }
 
     public function test_super_admin_bypasses_all_checks(): void

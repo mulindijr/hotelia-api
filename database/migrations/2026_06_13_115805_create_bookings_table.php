@@ -34,11 +34,11 @@ return new class extends Migration
                 'checked_in',
                 'checked_out',
                 'cancelled',
-                'no_show'
+                'no_show',
             ])->default('pending');
 
             $table->text('notes')->nullable();
-            
+
             $table->timestamps();
 
             $table->softDeletes();

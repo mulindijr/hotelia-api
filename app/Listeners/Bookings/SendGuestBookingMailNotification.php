@@ -2,6 +2,7 @@
 
 namespace App\Listeners\Bookings;
 
+use App\Constants\BookingStatus;
 use App\Events\Bookings\BookingCancelled;
 use App\Events\Bookings\BookingCreated;
 use App\Events\Bookings\BookingUpdated;
@@ -9,7 +10,6 @@ use App\Mail\Bookings\BookingCancelledMail;
 use App\Mail\Bookings\BookingConfirmationMail;
 use App\Mail\Bookings\BookingNoShowMail;
 use App\Mail\Bookings\BookingUpdatedMail;
-use App\Constants\BookingStatus;
 use Illuminate\Support\Facades\Mail;
 
 class SendGuestBookingMailNotification
@@ -22,7 +22,7 @@ class SendGuestBookingMailNotification
         $booking = $event->booking;
         $guest = $booking->guest;
 
-        if (!$guest || !$guest->email) {
+        if (! $guest || ! $guest->email) {
             return;
         }
 

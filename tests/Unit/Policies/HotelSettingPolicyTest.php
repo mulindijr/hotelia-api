@@ -6,8 +6,9 @@ use App\Models\Hotel;
 use App\Models\HotelSetting;
 use App\Models\User;
 use App\Policies\HotelSettingPolicy;
-use Tests\TestCase;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class HotelSettingPolicyTest extends TestCase
 {
@@ -18,8 +19,8 @@ class HotelSettingPolicyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->policy = new HotelSettingPolicy();
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->policy = new HotelSettingPolicy;
     }
 
     public function test_super_admin_bypasses_all_checks(): void

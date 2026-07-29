@@ -30,12 +30,13 @@ class BookingServiceFactory extends Factory
                 $hotelId = $booking ? $booking->hotel_id : Hotel::factory()->create()->id;
 
                 return Service::factory()->create([
-                    'hotel_id' => $hotelId
+                    'hotel_id' => $hotelId,
                 ])->id;
             },
             'quantity' => fake()->numberBetween(1, 3),
             'price' => function (array $attributes) {
                 $service = Service::find($attributes['service_id']);
+
                 return $service ? $service->price : 1000.00;
             },
         ];

@@ -25,7 +25,7 @@ class RoomFactory extends Factory
             'hotel_id' => Hotel::factory(),
             'room_type_id' => function (array $attributes) {
                 return RoomType::factory()->create([
-                    'hotel_id' => $attributes['hotel_id']
+                    'hotel_id' => $attributes['hotel_id'],
                 ])->id;
             },
             'room_number' => fake()->unique()->numerify('R###'),

@@ -5,7 +5,6 @@ namespace Tests\Feature\Api\V1\Housekeeping;
 use App\Constants\BookingStatus;
 use App\Constants\RoomStatus;
 use App\Models\Booking;
-
 use App\Models\Guest;
 use App\Models\Hotel;
 use App\Models\HousekeepingTask;
@@ -13,10 +12,9 @@ use App\Models\MaintenanceRequest;
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Services\Booking\BookingService;
-
 use App\Services\Housekeeping\HousekeepingService;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use Tests\TestCase;
 
 class CheckoutHousekeepingLifecycleTest extends TestCase
@@ -26,7 +24,7 @@ class CheckoutHousekeepingLifecycleTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
+        $this->seed(RolesAndPermissionsSeeder::class);
     }
 
     public function test_checkout_auto_creates_pending_housekeeping_task(): void

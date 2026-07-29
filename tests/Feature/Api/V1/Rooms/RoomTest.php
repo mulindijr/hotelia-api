@@ -68,7 +68,7 @@ class RoomTest extends ApiTestCase
     {
         $user = $this->actingAsRole('hotel_manager');
         $hotel = $this->createHotelForUser($user);
-        
+
         $otherHotel = Hotel::factory()->create();
         $otherRoomType = RoomType::factory()->create(['hotel_id' => $otherHotel->id]);
 

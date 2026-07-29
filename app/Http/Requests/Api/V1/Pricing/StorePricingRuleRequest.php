@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Http\Requests\Api\V1\Pricing;
+
+use App\Models\PricingRule;
+use Illuminate\Foundation\Http\FormRequest;
+
+class StorePricingRuleRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        $hotel = $this->route('hotel');
+        return $this->user()->can('create', [PricingRule::class, $hotel]);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'rate_plan_id' => ['nullable', 'integer', 'exists:rate_plans,id'],
+            'room_type_id' => ['nullable', 'integer', 'exists:room_types,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'start_date' => ['nullable', 'date', 'date_format:Y-m-d'],
+            'end_date' => ['nullable', 'date', 'date_format:Y-m-d', 'after_or_equal:start_date'],
+            'days_of_week' => ['nullable', 'array'],
+            'days_of_week.*' => ['string', 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday'],
+            'min_nights' => ['nullable', 'integer', 'min:1'],
+            'max_nights' => ['nullable', 'integer', 'min:1'],
+            'price_modifier_type' => ['required', 'in:percentage,fixed,override'],
+            'price_modifier_value' => ['required', 'numeric'],
+            'priority' => ['nullable', 'integer'],
+            'is_active' => ['nullable', 'boolean'],
+        ];
+    }
+}

@@ -20,7 +20,7 @@ class BookingUpdatedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Booking Modification - ' . $this->booking->booking_reference,
+            subject: 'Booking Modification - '.$this->booking->booking_reference,
         );
     }
 

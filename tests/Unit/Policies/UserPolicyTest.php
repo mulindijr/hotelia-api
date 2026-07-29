@@ -5,8 +5,9 @@ namespace Tests\Unit\Policies;
 use App\Models\Hotel;
 use App\Models\User;
 use App\Policies\UserPolicy;
-use Tests\TestCase;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class UserPolicyTest extends TestCase
 {
@@ -17,8 +18,8 @@ class UserPolicyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->policy = new UserPolicy();
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->policy = new UserPolicy;
     }
 
     public function test_super_admin_bypasses_all_checks(): void
@@ -32,10 +33,10 @@ class UserPolicyTest extends TestCase
     public function test_user_can_view_target_user_in_same_hotel(): void
     {
         $hotel = Hotel::factory()->create();
-        
+
         $user = User::factory()->create();
         $user->hotels()->attach($hotel->id);
-        
+
         $targetUser = User::factory()->create();
         $targetUser->hotels()->attach($hotel->id);
 
@@ -46,10 +47,10 @@ class UserPolicyTest extends TestCase
     {
         $hotelA = Hotel::factory()->create();
         $hotelB = Hotel::factory()->create();
-        
+
         $user = User::factory()->create();
         $user->hotels()->attach($hotelA->id);
-        
+
         $targetUser = User::factory()->create();
         $targetUser->hotels()->attach($hotelB->id);
 
@@ -59,10 +60,10 @@ class UserPolicyTest extends TestCase
     public function test_user_can_update_target_user_in_same_hotel(): void
     {
         $hotel = Hotel::factory()->create();
-        
+
         $user = User::factory()->create();
         $user->hotels()->attach($hotel->id);
-        
+
         $targetUser = User::factory()->create();
         $targetUser->hotels()->attach($hotel->id);
 
@@ -73,10 +74,10 @@ class UserPolicyTest extends TestCase
     {
         $hotelA = Hotel::factory()->create();
         $hotelB = Hotel::factory()->create();
-        
+
         $user = User::factory()->create();
         $user->hotels()->attach($hotelA->id);
-        
+
         $targetUser = User::factory()->create();
         $targetUser->hotels()->attach($hotelB->id);
 
@@ -86,10 +87,10 @@ class UserPolicyTest extends TestCase
     public function test_user_cannot_update_super_admin(): void
     {
         $hotel = Hotel::factory()->create();
-        
+
         $user = User::factory()->create();
         $user->hotels()->attach($hotel->id);
-        
+
         $targetUser = User::factory()->create();
         $targetUser->assignRole('super_admin');
         $targetUser->hotels()->attach($hotel->id);
@@ -100,10 +101,10 @@ class UserPolicyTest extends TestCase
     public function test_user_can_delete_target_user_in_same_hotel(): void
     {
         $hotel = Hotel::factory()->create();
-        
+
         $user = User::factory()->create();
         $user->hotels()->attach($hotel->id);
-        
+
         $targetUser = User::factory()->create();
         $targetUser->hotels()->attach($hotel->id);
 
@@ -114,10 +115,10 @@ class UserPolicyTest extends TestCase
     {
         $hotelA = Hotel::factory()->create();
         $hotelB = Hotel::factory()->create();
-        
+
         $user = User::factory()->create();
         $user->hotels()->attach($hotelA->id);
-        
+
         $targetUser = User::factory()->create();
         $targetUser->hotels()->attach($hotelB->id);
 
@@ -127,10 +128,10 @@ class UserPolicyTest extends TestCase
     public function test_user_cannot_delete_super_admin(): void
     {
         $hotel = Hotel::factory()->create();
-        
+
         $user = User::factory()->create();
         $user->hotels()->attach($hotel->id);
-        
+
         $targetUser = User::factory()->create();
         $targetUser->assignRole('super_admin');
         $targetUser->hotels()->attach($hotel->id);

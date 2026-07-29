@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Api\V1\Guests;
 
-use App\Models\Guest;
 use App\Models\Booking;
+use App\Models\Guest;
 use App\Models\Hotel;
 use Tests\ApiTestCase;
 use Tests\Traits\InteractsWithHotels;
@@ -11,6 +11,7 @@ use Tests\Traits\InteractsWithHotels;
 class GuestTest extends ApiTestCase
 {
     use InteractsWithHotels;
+
     /**
      * Test listing guests.
      */

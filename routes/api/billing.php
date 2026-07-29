@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Billing\InvoiceController;
 use App\Http\Controllers\Api\V1\Billing\PaymentController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/bookings/{booking}')->scopeBindings()->group(function () {
     Route::get('/invoice', [InvoiceController::class, 'show'])->name('bookings.invoice.show');

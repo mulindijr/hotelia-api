@@ -8,20 +8,20 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
-#[OA\Tag(name: "Notifications", description: "In-app staff notification management operations")]
+#[OA\Tag(name: 'Notifications', description: 'In-app staff notification management operations')]
 class NotificationController extends Controller
 {
     #[OA\Get(
-        path: "/api/v1/notifications",
-        summary: "Display a listing of notifications for the authenticated user",
-        tags: ["Notifications"],
-        security: [["sanctum" => []]],
+        path: '/api/v1/notifications',
+        summary: 'Display a listing of notifications for the authenticated user',
+        tags: ['Notifications'],
+        security: [['sanctum' => []]],
         parameters: [
-            new OA\Parameter(name: "page", in: "query", required: false, schema: new OA\Schema(type: "integer", default: 1))
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 1)),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Notifications list retrieved successfully"),
-            new OA\Response(response: 401, description: "Unauthenticated")
+            new OA\Response(response: 200, description: 'Notifications list retrieved successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
         ]
     )]
     public function index(Request $request): JsonResponse
@@ -42,17 +42,17 @@ class NotificationController extends Controller
     }
 
     #[OA\Post(
-        path: "/api/v1/notifications/{id}/read",
-        summary: "Mark a specific notification as read",
-        tags: ["Notifications"],
-        security: [["sanctum" => []]],
+        path: '/api/v1/notifications/{id}/read',
+        summary: 'Mark a specific notification as read',
+        tags: ['Notifications'],
+        security: [['sanctum' => []]],
         parameters: [
-            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "string"))
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Notification marked as read successfully"),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 404, description: "Notification not found")
+            new OA\Response(response: 200, description: 'Notification marked as read successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 404, description: 'Notification not found'),
         ]
     )]
     public function read(Request $request, string $id): JsonResponse
@@ -67,13 +67,13 @@ class NotificationController extends Controller
     }
 
     #[OA\Post(
-        path: "/api/v1/notifications/read-all",
-        summary: "Mark all notifications as read",
-        tags: ["Notifications"],
-        security: [["sanctum" => []]],
+        path: '/api/v1/notifications/read-all',
+        summary: 'Mark all notifications as read',
+        tags: ['Notifications'],
+        security: [['sanctum' => []]],
         responses: [
-            new OA\Response(response: 200, description: "All notifications marked as read successfully"),
-            new OA\Response(response: 401, description: "Unauthenticated")
+            new OA\Response(response: 200, description: 'All notifications marked as read successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
         ]
     )]
     public function readAll(Request $request): JsonResponse

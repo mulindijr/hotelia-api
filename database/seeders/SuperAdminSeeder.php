@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\PasswordHistory;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use App\Models\PasswordHistory;
 use Illuminate\Support\Facades\Hash;
 
 class SuperAdminSeeder extends Seeder

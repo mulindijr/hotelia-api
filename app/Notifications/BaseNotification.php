@@ -8,36 +8,36 @@ use Illuminate\Notifications\Notification;
 
 abstract class BaseNotification extends Notification implements ShouldQueue
 {
-  use Queueable;
+    use Queueable;
 
-  /**
-   * Maximum retry attempts.
-   */
-  public int $tries = 3;
+    /**
+     * Maximum retry attempts.
+     */
+    public int $tries = 3;
 
-  /**
-   * Timeout in seconds.
-   */
-  public int $timeout = 120;
+    /**
+     * Timeout in seconds.
+     */
+    public int $timeout = 120;
 
-  public function __construct()
-  {
-    $this->queue = 'notifications';
-  }
+    public function __construct()
+    {
+        $this->queue = 'notifications';
+    }
 
-  /**
-   * Retry delays (seconds).
-   */
-  public function backoff(): array
-  {
-    return [10, 30, 60];
-  }
+    /**
+     * Retry delays (seconds).
+     */
+    public function backoff(): array
+    {
+        return [10, 30, 60];
+    }
 
-  /**
-   * Tags for Horizon / monitoring.
-   */
-  public function tags(): array
-  {
-    return [];
-  }
+    /**
+     * Tags for Horizon / monitoring.
+     */
+    public function tags(): array
+    {
+        return [];
+    }
 }

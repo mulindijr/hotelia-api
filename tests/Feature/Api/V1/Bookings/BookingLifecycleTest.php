@@ -6,11 +6,9 @@ use App\Constants\BookingStatus;
 use App\Constants\RoomStatus;
 use App\Models\Booking;
 use App\Models\Guest;
-use App\Models\Hotel;
-use App\Models\HotelSetting;
 use App\Models\Room;
 use App\Models\RoomType;
-use Carbon\Carbon;
+use App\Services\Hotel\HotelSettingService;
 use Tests\ApiTestCase;
 use Tests\Traits\InteractsWithHotels;
 
@@ -114,7 +112,7 @@ class BookingLifecycleTest extends ApiTestCase
 
         $response = $this->postJson(route('bookings.no-show', [$hotel, $booking]));
         $response->assertOk();
-        
+
         $booking->refresh();
         $room->refresh();
         $this->assertEquals(BookingStatus::NO_SHOW, $booking->status);
@@ -125,10 +123,10 @@ class BookingLifecycleTest extends ApiTestCase
     {
         $user = $this->actingAsRole('hotel_manager');
         $hotel = $this->createHotelForUser($user);
-        
+
         // Disable overbooking
-        $settings = app(\App\Services\Hotel\HotelSettingService::class)->getSettings($hotel);
-        app(\App\Services\Hotel\HotelSettingService::class)->update($settings, ['allow_overbooking' => false]);
+        $settings = app(HotelSettingService::class)->getSettings($hotel);
+        app(HotelSettingService::class)->update($settings, ['allow_overbooking' => false]);
 
         $guest1 = Guest::factory()->create();
         $guest2 = Guest::factory()->create();
@@ -157,8 +155,8 @@ class BookingLifecycleTest extends ApiTestCase
         ])->assertStatus(422);
 
         // Enable overbooking
-        $settings = app(\App\Services\Hotel\HotelSettingService::class)->getSettings($hotel);
-        app(\App\Services\Hotel\HotelSettingService::class)->update($settings, ['allow_overbooking' => true]);
+        $settings = app(HotelSettingService::class)->getSettings($hotel);
+        app(HotelSettingService::class)->update($settings, ['allow_overbooking' => true]);
 
         // Create booking 2 overlapping again -> should succeed and flag is_overbooked as true
         $response = $this->postJson(route('bookings.store', $hotel), [
@@ -177,9 +175,9 @@ class BookingLifecycleTest extends ApiTestCase
     {
         $user = $this->actingAsRole('hotel_manager');
         $hotel = $this->createHotelForUser($user);
-        
-        $settings = app(\App\Services\Hotel\HotelSettingService::class)->getSettings($hotel);
-        app(\App\Services\Hotel\HotelSettingService::class)->update($settings, [
+
+        $settings = app(HotelSettingService::class)->getSettings($hotel);
+        app(HotelSettingService::class)->update($settings, [
             'booking_cancellation_hours' => 24,
             'check_in_time' => '14:00',
         ]);

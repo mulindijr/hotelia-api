@@ -8,7 +8,6 @@ use App\Models\BookingRoom;
 use App\Models\BookingService;
 use App\Models\Guest;
 use App\Models\Hotel;
-use App\Models\HotelSetting;
 use App\Models\HousekeepingTask;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
@@ -34,7 +33,7 @@ class DemoDataSeeder extends Seeder
         $pool = Amenity::factory()->pool()->create();
         $gym = Amenity::factory()->gym()->create();
         $minibar = Amenity::factory()->minibar()->create();
-        
+
         $allAmenities = [$wifi, $ac, $pool, $gym, $minibar];
 
         // 2. Define Hotels configurations to seed
@@ -74,7 +73,7 @@ class DemoDataSeeder extends Seeder
                 $hotel = $hotel->budget();
             }
             $hotel = $hotel->create([
-                'name' => $hData['name']
+                'name' => $hData['name'],
             ]);
 
             // Update or create settings to match config
@@ -84,7 +83,7 @@ class DemoDataSeeder extends Seeder
                     'currency' => $hData['currency'],
                     'timezone' => $hData['timezone'],
                     'booking_prefix' => $hData['prefix'],
-                    'invoice_prefix' => $hData['prefix'] . '-INV',
+                    'invoice_prefix' => $hData['prefix'].'-INV',
                     'tax_rate' => $hData['tax_rate'],
                     'allow_overbooking' => $hData['type'] === 'luxury',
                 ]
@@ -144,11 +143,11 @@ class DemoDataSeeder extends Seeder
             for ($floor = 1; $floor <= 3; $floor++) {
                 foreach ($roomTypes as $rTypeIndex => $rType) {
                     for ($roomNum = 1; $roomNum <= 2; $roomNum++) {
-                        $number = "{$floor}0" . (($rTypeIndex * 2) + $roomNum);
+                        $number = "{$floor}0".(($rTypeIndex * 2) + $roomNum);
                         $rooms[] = Room::factory()->create([
                             'hotel_id' => $hotel->id,
                             'room_type_id' => $rType->id,
-                            'room_number' => $hData['prefix'] . '-' . $number,
+                            'room_number' => $hData['prefix'].'-'.$number,
                             'floor' => $floor,
                             'status' => 'available',
                         ]);

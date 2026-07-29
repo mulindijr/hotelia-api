@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
@@ -89,6 +89,13 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Activity Logs
             'view activity logs',
+
+            // Availability & Pricing
+            'view availability',
+            'view rate plans',
+            'manage rate plans',
+            'view pricing rules',
+            'manage pricing rules',
         ];
 
         foreach ($permissions as $permission) {
@@ -165,6 +172,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'delete services',
 
             'view reports',
+
+            'view availability',
+            'view rate plans',
+            'manage rate plans',
+            'view pricing rules',
+            'manage pricing rules',
         ]);
 
         // Receptionist
@@ -183,6 +196,10 @@ class RolesAndPermissionsSeeder extends Seeder
 
             'check in guests',
             'check out guests',
+
+            'view availability',
+            'view rate plans',
+            'view pricing rules',
         ]);
 
         // Housekeeper

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Api\V1\Auth;
 
-use App\Models\User;
 use App\Models\PasswordHistory;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Tests\ApiTestCase;

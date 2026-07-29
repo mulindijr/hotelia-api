@@ -3,8 +3,8 @@
 namespace App\Services\Room;
 
 use App\Events\Rooms\AmenityCreated;
-use App\Events\Rooms\AmenityUpdated;
 use App\Events\Rooms\AmenityDeleted;
+use App\Events\Rooms\AmenityUpdated;
 use App\Models\Amenity;
 
 class AmenityService

@@ -25,7 +25,7 @@ class InvoiceFactory extends Factory
         $totalAmount = $subtotal + $taxAmount;
 
         return [
-            'invoice_number' => 'INV-' . fake()->unique()->bothify('#####??'),
+            'invoice_number' => 'INV-'.fake()->unique()->bothify('#####??'),
             'booking_id' => Booking::factory(),
             'subtotal' => $subtotal,
             'tax_amount' => $taxAmount,

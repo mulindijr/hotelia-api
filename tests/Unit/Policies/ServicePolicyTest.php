@@ -6,8 +6,9 @@ use App\Models\Hotel;
 use App\Models\Service;
 use App\Models\User;
 use App\Policies\ServicePolicy;
-use Tests\TestCase;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ServicePolicyTest extends TestCase
 {
@@ -18,8 +19,8 @@ class ServicePolicyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->policy = new ServicePolicy();
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->policy = new ServicePolicy;
     }
 
     public function test_super_admin_bypasses_all_checks(): void

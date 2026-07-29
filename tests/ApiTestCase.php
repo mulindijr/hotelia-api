@@ -26,6 +26,7 @@ abstract class ApiTestCase extends TestCase
     protected function actingAsUser(User $user, array $abilities = ['*']): self
     {
         Sanctum::actingAs($user, $abilities);
+
         return $this;
     }
 
@@ -39,9 +40,9 @@ abstract class ApiTestCase extends TestCase
 
         $user = User::factory()->create();
         $user->assignRole($role);
-        
+
         $this->actingAsUser($user);
-        
+
         return $user;
     }
 }

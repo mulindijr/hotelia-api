@@ -22,7 +22,7 @@ return new class extends Migration
                 'cash',
                 'card',
                 'mpesa',
-                'bank_transfer'
+                'bank_transfer',
             ]);
 
             $table->string('transaction_reference')->nullable();
@@ -31,7 +31,7 @@ return new class extends Migration
                 'pending',
                 'completed',
                 'failed',
-                'refunded'
+                'refunded',
             ])->default('pending');
 
             $table->timestamps();

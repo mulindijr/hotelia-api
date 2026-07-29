@@ -20,7 +20,7 @@ class InvoiceGeneratedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Invoice Issued - ' . $this->invoice->invoice_number,
+            subject: 'Invoice Issued - '.$this->invoice->invoice_number,
         );
     }
 

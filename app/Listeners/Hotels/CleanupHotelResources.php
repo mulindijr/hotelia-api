@@ -33,7 +33,8 @@ class CleanupHotelResources implements ShouldQueue
         }
     }
 
-    public function failed(HotelDeleted $event, \Throwable $exception): void {
+    public function failed(HotelDeleted $event, \Throwable $exception): void
+    {
         Log::error(
             'Hotel cleanup failed.',
             [

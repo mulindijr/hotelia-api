@@ -3,8 +3,8 @@
 namespace App\Services\Maintenance;
 
 use App\Events\Maintenance\MaintenanceRequestCreated;
-use App\Events\Maintenance\MaintenanceRequestUpdated;
 use App\Events\Maintenance\MaintenanceRequestDeleted;
+use App\Events\Maintenance\MaintenanceRequestUpdated;
 use App\Models\Hotel;
 use App\Models\MaintenanceRequest;
 use Illuminate\Support\Facades\DB;

@@ -3,8 +3,8 @@
 namespace App\Services\Hotel;
 
 use App\Events\Services\ServiceCreated;
-use App\Events\Services\ServiceUpdated;
 use App\Events\Services\ServiceDeleted;
+use App\Events\Services\ServiceUpdated;
 use App\Models\Hotel;
 use App\Models\Service;
 use Illuminate\Support\Facades\Cache;

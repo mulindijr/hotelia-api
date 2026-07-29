@@ -19,7 +19,7 @@ class SendInvoiceNotification
         $booking = $invoice->booking;
         $guest = $booking?->guest;
 
-        if (!$guest || !$guest->email) {
+        if (! $guest || ! $guest->email) {
             return;
         }
 

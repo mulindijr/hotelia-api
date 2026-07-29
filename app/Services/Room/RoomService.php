@@ -3,8 +3,8 @@
 namespace App\Services\Room;
 
 use App\Events\Rooms\RoomCreated;
-use App\Events\Rooms\RoomUpdated;
 use App\Events\Rooms\RoomDeleted;
+use App\Events\Rooms\RoomUpdated;
 use App\Models\Hotel;
 use App\Models\Room;
 

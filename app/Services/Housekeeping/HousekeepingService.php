@@ -4,8 +4,8 @@ namespace App\Services\Housekeeping;
 
 use App\Constants\RoomStatus;
 use App\Events\Housekeeping\HousekeepingTaskCreated;
-use App\Events\Housekeeping\HousekeepingTaskUpdated;
 use App\Events\Housekeeping\HousekeepingTaskDeleted;
+use App\Events\Housekeeping\HousekeepingTaskUpdated;
 use App\Models\Hotel;
 use App\Models\HousekeepingTask;
 use App\Models\MaintenanceRequest;
@@ -60,7 +60,7 @@ class HousekeepingService
                         ->whereIn('status', ['pending', 'in_progress'])
                         ->exists();
 
-                    if (!$hasPendingTasks) {
+                    if (! $hasPendingTasks) {
                         $room->update(['status' => RoomStatus::AVAILABLE]);
                     }
                 }

@@ -3,8 +3,8 @@
 namespace App\Services\Guest;
 
 use App\Events\Guests\GuestCreated;
-use App\Events\Guests\GuestUpdated;
 use App\Events\Guests\GuestDeleted;
+use App\Events\Guests\GuestUpdated;
 use App\Models\Guest;
 
 class GuestService

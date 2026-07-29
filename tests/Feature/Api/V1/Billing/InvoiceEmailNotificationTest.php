@@ -4,12 +4,12 @@ namespace Tests\Feature\Api\V1\Billing;
 
 use App\Constants\BookingStatus;
 use App\Constants\RoomStatus;
+use App\Mail\Billing\InvoiceGeneratedMail;
+use App\Mail\Billing\InvoicePaidMail;
 use App\Models\Booking;
 use App\Models\Guest;
 use App\Models\Room;
 use App\Models\RoomType;
-use App\Mail\Billing\InvoiceGeneratedMail;
-use App\Mail\Billing\InvoicePaidMail;
 use App\Services\Billing\BillingService;
 use Illuminate\Support\Facades\Mail;
 use Tests\ApiTestCase;

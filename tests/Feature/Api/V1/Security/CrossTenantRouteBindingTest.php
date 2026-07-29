@@ -9,7 +9,6 @@ use App\Models\MaintenanceRequest;
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\Service;
-use App\Models\User;
 use Tests\ApiTestCase;
 use Tests\Traits\InteractsWithHotels;
 
