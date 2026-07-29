@@ -10,6 +10,7 @@ class UpdateRatePlanRequest extends FormRequest
     {
         $hotel = $this->route('hotel');
         $ratePlan = $this->route('rate_plan');
+
         return $this->user()->can('update', [$ratePlan, $hotel]);
     }
 

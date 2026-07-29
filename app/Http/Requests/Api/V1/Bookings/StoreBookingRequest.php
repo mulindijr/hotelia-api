@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api\V1\Bookings;
 
 use App\Constants\BookingStatus;
+use App\Models\Booking;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -72,13 +73,13 @@ class StoreBookingRequest extends FormRequest
             $checkOut = $this->input('check_out_date');
             $roomIds = $this->input('rooms');
 
-            $conflictingBookings = \App\Models\Booking::where('status', '!=', BookingStatus::CANCELLED)
+            $conflictingBookings = Booking::where('status', '!=', BookingStatus::CANCELLED)
                 ->whereHas('rooms', function ($query) use ($roomIds) {
                     $query->whereIn('rooms.id', $roomIds);
                 })
                 ->where(function ($query) use ($checkIn, $checkOut) {
                     $query->where('check_in_date', '<', $checkOut)
-                          ->where('check_out_date', '>', $checkIn);
+                        ->where('check_out_date', '>', $checkIn);
                 })
                 ->with('rooms')
                 ->get();

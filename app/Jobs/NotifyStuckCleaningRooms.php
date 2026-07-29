@@ -49,7 +49,7 @@ class NotifyStuckCleaningRooms implements ShouldQueue
 
         foreach ($roomsByHotel as $hotelId => $rooms) {
             $hotel = $rooms->first()?->hotel;
-            if (!$hotel) {
+            if (! $hotel) {
                 continue;
             }
 
@@ -78,4 +78,3 @@ class NotifyStuckCleaningRooms implements ShouldQueue
         }
     }
 }
-

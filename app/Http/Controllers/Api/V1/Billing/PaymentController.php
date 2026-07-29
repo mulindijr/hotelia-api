@@ -13,10 +13,10 @@ use App\Services\Billing\BillingService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Spatie\QueryBuilder\QueryBuilder;
 use OpenApi\Attributes as OA;
+use Spatie\QueryBuilder\QueryBuilder;
 
-#[OA\Tag(name: "Billing")]
+#[OA\Tag(name: 'Billing')]
 class PaymentController extends Controller
 {
     use AuthorizesRequests;
@@ -26,21 +26,21 @@ class PaymentController extends Controller
     ) {}
 
     #[OA\Get(
-        path: "/api/v1/hotels/{hotel}/bookings/{booking}/payments",
-        summary: "Display a listing of payments logged for a booking",
-        tags: ["Billing"],
-        security: [["sanctum" => []]],
+        path: '/api/v1/hotels/{hotel}/bookings/{booking}/payments',
+        summary: 'Display a listing of payments logged for a booking',
+        tags: ['Billing'],
+        security: [['sanctum' => []]],
         parameters: [
-            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
-            new OA\Parameter(name: "booking", in: "path", required: true, schema: new OA\Schema(type: "integer")),
-            new OA\Parameter(name: "per_page", in: "query", required: false, schema: new OA\Schema(type: "integer", default: 15)),
-            new OA\Parameter(name: "filter[status]", in: "query", required: false, schema: new OA\Schema(type: "string")),
-            new OA\Parameter(name: "filter[payment_method]", in: "query", required: false, schema: new OA\Schema(type: "string"))
+            new OA\Parameter(name: 'hotel', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'booking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 15)),
+            new OA\Parameter(name: 'filter[status]', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'filter[payment_method]', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Payments list retrieved successfully"),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 404, description: "Booking or Hotel not found")
+            new OA\Response(response: 200, description: 'Payments list retrieved successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 404, description: 'Booking or Hotel not found'),
         ]
     )]
     public function index(Request $request, Hotel $hotel, Booking $booking): JsonResponse
@@ -63,30 +63,30 @@ class PaymentController extends Controller
     }
 
     #[OA\Post(
-        path: "/api/v1/hotels/{hotel}/bookings/{booking}/payments",
-        summary: "Log a new payment for the booking",
-        tags: ["Billing"],
-        security: [["sanctum" => []]],
+        path: '/api/v1/hotels/{hotel}/bookings/{booking}/payments',
+        summary: 'Log a new payment for the booking',
+        tags: ['Billing'],
+        security: [['sanctum' => []]],
         parameters: [
-            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
-            new OA\Parameter(name: "booking", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: 'hotel', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'booking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["amount", "payment_method"],
+                required: ['amount', 'payment_method'],
                 properties: [
-                    new OA\Property(property: "amount", type: "number", format: "float", example: 5000.00),
-                    new OA\Property(property: "payment_method", type: "string", example: "m-pesa"),
-                    new OA\Property(property: "transaction_reference", type: "string", example: "TXN12345678"),
-                    new OA\Property(property: "status", type: "string", example: "completed")
+                    new OA\Property(property: 'amount', type: 'number', format: 'float', example: 5000.00),
+                    new OA\Property(property: 'payment_method', type: 'string', example: 'm-pesa'),
+                    new OA\Property(property: 'transaction_reference', type: 'string', example: 'TXN12345678'),
+                    new OA\Property(property: 'status', type: 'string', example: 'completed'),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 201, description: "Payment logged successfully"),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 422, description: "Validation failed")
+            new OA\Response(response: 201, description: 'Payment logged successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 422, description: 'Validation failed'),
         ]
     )]
     public function store(StorePaymentRequest $request, Hotel $hotel, Booking $booking): JsonResponse
@@ -103,28 +103,28 @@ class PaymentController extends Controller
     }
 
     #[OA\Put(
-        path: "/api/v1/hotels/{hotel}/bookings/{booking}/payments/{payment}/status",
-        summary: "Update the status of a specific payment log",
-        tags: ["Billing"],
-        security: [["sanctum" => []]],
+        path: '/api/v1/hotels/{hotel}/bookings/{booking}/payments/{payment}/status',
+        summary: 'Update the status of a specific payment log',
+        tags: ['Billing'],
+        security: [['sanctum' => []]],
         parameters: [
-            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
-            new OA\Parameter(name: "booking", in: "path", required: true, schema: new OA\Schema(type: "integer")),
-            new OA\Parameter(name: "payment", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: 'hotel', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'booking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'payment', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["status"],
+                required: ['status'],
                 properties: [
-                    new OA\Property(property: "status", type: "string", example: "completed")
+                    new OA\Property(property: 'status', type: 'string', example: 'completed'),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Payment status updated successfully"),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 422, description: "Validation failed")
+            new OA\Response(response: 200, description: 'Payment status updated successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 422, description: 'Validation failed'),
         ]
     )]
     public function updateStatus(UpdatePaymentStatusRequest $request, Hotel $hotel, Booking $booking, Payment $payment): JsonResponse

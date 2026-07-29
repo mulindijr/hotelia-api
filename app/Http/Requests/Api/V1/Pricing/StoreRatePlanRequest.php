@@ -10,6 +10,7 @@ class StoreRatePlanRequest extends FormRequest
     public function authorize(): bool
     {
         $hotel = $this->route('hotel');
+
         return $this->user()->can('create', [RatePlan::class, $hotel]);
     }
 

@@ -24,7 +24,7 @@ class UpdateHotelRequest extends FormRequest
     public function rules(): array
     {
         $hotelId = $this->route('hotel')?->id;
-        
+
         return [
             'name' => ['sometimes', 'string', 'max:255'],
 

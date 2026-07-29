@@ -16,6 +16,7 @@ use OpenApi\Attributes as OA;
 class RatePlanController extends Controller
 {
     use AuthorizesRequests;
+
     #[OA\Get(
         path: '/api/v1/hotels/{hotel_id}/rate-plans',
         summary: 'List all rate plans for a hotel',
@@ -50,7 +51,7 @@ class RatePlanController extends Controller
         $data = $request->validated();
         $data['hotel_id'] = $hotel->id;
 
-        if (!empty($data['is_default'])) {
+        if (! empty($data['is_default'])) {
             RatePlan::where('hotel_id', $hotel->id)->update(['is_default' => false]);
         }
 
@@ -98,7 +99,7 @@ class RatePlanController extends Controller
     {
         $data = $request->validated();
 
-        if (!empty($data['is_default'])) {
+        if (! empty($data['is_default'])) {
             RatePlan::where('hotel_id', $hotel->id)
                 ->where('id', '!=', $ratePlan->id)
                 ->update(['is_default' => false]);

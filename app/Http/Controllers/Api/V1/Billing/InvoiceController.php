@@ -11,7 +11,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use OpenApi\Attributes as OA;
 
-#[OA\Tag(name: "Billing", description: "Hotel billing and invoice management operations")]
+#[OA\Tag(name: 'Billing', description: 'Hotel billing and invoice management operations')]
 class InvoiceController extends Controller
 {
     use AuthorizesRequests;
@@ -21,18 +21,18 @@ class InvoiceController extends Controller
     ) {}
 
     #[OA\Get(
-        path: "/api/v1/hotels/{hotel}/bookings/{booking}/invoice",
+        path: '/api/v1/hotels/{hotel}/bookings/{booking}/invoice',
         summary: "Display the booking's invoice (generate if not existing)",
-        tags: ["Billing"],
-        security: [["sanctum" => []]],
+        tags: ['Billing'],
+        security: [['sanctum' => []]],
         parameters: [
-            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
-            new OA\Parameter(name: "booking", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: 'hotel', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'booking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Invoice details retrieved successfully"),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 404, description: "Booking or Hotel not found")
+            new OA\Response(response: 200, description: 'Invoice details retrieved successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 404, description: 'Booking or Hotel not found'),
         ]
     )]
     public function show(Hotel $hotel, Booking $booking): JsonResponse
@@ -49,18 +49,18 @@ class InvoiceController extends Controller
     }
 
     #[OA\Post(
-        path: "/api/v1/hotels/{hotel}/bookings/{booking}/invoice/regenerate",
-        summary: "Manually trigger invoice regeneration (e.g. after booking modifications)",
-        tags: ["Billing"],
-        security: [["sanctum" => []]],
+        path: '/api/v1/hotels/{hotel}/bookings/{booking}/invoice/regenerate',
+        summary: 'Manually trigger invoice regeneration (e.g. after booking modifications)',
+        tags: ['Billing'],
+        security: [['sanctum' => []]],
         parameters: [
-            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
-            new OA\Parameter(name: "booking", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: 'hotel', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'booking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Invoice regenerated successfully"),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 404, description: "Booking or Hotel not found")
+            new OA\Response(response: 200, description: 'Invoice regenerated successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 404, description: 'Booking or Hotel not found'),
         ]
     )]
     public function regenerate(Hotel $hotel, Booking $booking): JsonResponse

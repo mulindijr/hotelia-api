@@ -10,6 +10,7 @@ class StorePricingRuleRequest extends FormRequest
     public function authorize(): bool
     {
         $hotel = $this->route('hotel');
+
         return $this->user()->can('create', [PricingRule::class, $hotel]);
     }
 

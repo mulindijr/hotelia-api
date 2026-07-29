@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api\V1\Bookings;
 
 use App\Constants\BookingStatus;
+use App\Models\Booking;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -74,25 +75,25 @@ class UpdateBookingRequest extends FormRequest
 
             $checkIn = $this->input('check_in_date') ?? $booking?->check_in_date?->toDateString();
             $checkOut = $this->input('check_out_date') ?? $booking?->check_out_date?->toDateString();
-            
+
             // If rooms array is not provided, load the current booking's room IDs
             $roomIds = $this->input('rooms');
             if (is_null($roomIds) && $booking) {
                 $roomIds = $booking->rooms()->pluck('rooms.id')->toArray();
             }
 
-            if (empty($roomIds) || !$checkIn || !$checkOut) {
+            if (empty($roomIds) || ! $checkIn || ! $checkOut) {
                 return;
             }
 
-            $conflictingBookings = \App\Models\Booking::where('id', '!=', $bookingId)
+            $conflictingBookings = Booking::where('id', '!=', $bookingId)
                 ->where('status', '!=', BookingStatus::CANCELLED)
                 ->whereHas('rooms', function ($query) use ($roomIds) {
                     $query->whereIn('rooms.id', $roomIds);
                 })
                 ->where(function ($query) use ($checkIn, $checkOut) {
                     $query->where('check_in_date', '<', $checkOut)
-                          ->where('check_out_date', '>', $checkIn);
+                        ->where('check_out_date', '>', $checkIn);
                 })
                 ->with('rooms')
                 ->get();

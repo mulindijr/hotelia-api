@@ -8,10 +8,9 @@ use App\Services\Report\ReportService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
 use OpenApi\Attributes as OA;
 
-#[OA\Tag(name: "Reports", description: "Operational and financial reporting dashboard endpoints")]
+#[OA\Tag(name: 'Reports', description: 'Operational and financial reporting dashboard endpoints')]
 class ReportController extends Controller
 {
     use AuthorizesRequests;
@@ -21,16 +20,16 @@ class ReportController extends Controller
     ) {}
 
     #[OA\Get(
-        path: "/api/v1/hotels/{hotel}/reports/dashboard",
-        summary: "Retrieve real-time operational dashboard stats for a hotel",
-        tags: ["Reports"],
-        security: [["bearerAuth" => []]],
+        path: '/api/v1/hotels/{hotel}/reports/dashboard',
+        summary: 'Retrieve real-time operational dashboard stats for a hotel',
+        tags: ['Reports'],
+        security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: 'hotel', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Dashboard statistics retrieved successfully"),
-            new OA\Response(response: 403, description: "Forbidden")
+            new OA\Response(response: 200, description: 'Dashboard statistics retrieved successfully'),
+            new OA\Response(response: 403, description: 'Forbidden'),
         ]
     )]
     public function dashboard(Hotel $hotel): JsonResponse
@@ -47,18 +46,18 @@ class ReportController extends Controller
     }
 
     #[OA\Get(
-        path: "/api/v1/hotels/{hotel}/reports/revenue",
-        summary: "Retrieve range-based financial revenue KPIs (ADR, RevPAR, payments)",
-        tags: ["Reports"],
-        security: [["bearerAuth" => []]],
+        path: '/api/v1/hotels/{hotel}/reports/revenue',
+        summary: 'Retrieve range-based financial revenue KPIs (ADR, RevPAR, payments)',
+        tags: ['Reports'],
+        security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: "hotel", in: "path", required: true, schema: new OA\Schema(type: "integer")),
-            new OA\Parameter(name: "start_date", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date", example: "2026-07-01")),
-            new OA\Parameter(name: "end_date", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date", example: "2026-07-31"))
+            new OA\Parameter(name: 'hotel', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'start_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date', example: '2026-07-01')),
+            new OA\Parameter(name: 'end_date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date', example: '2026-07-31')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Revenue statistics retrieved successfully"),
-            new OA\Response(response: 422, description: "Validation failed")
+            new OA\Response(response: 200, description: 'Revenue statistics retrieved successfully'),
+            new OA\Response(response: 422, description: 'Validation failed'),
         ]
     )]
     public function revenue(Request $request, Hotel $hotel): JsonResponse
