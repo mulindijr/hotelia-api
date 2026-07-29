@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsAuditTrail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -9,11 +10,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
-use App\Traits\LogsAuditTrail;
 use Spatie\Activitylog\Support\LogOptions;
+use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable([
     'first_name',
@@ -33,13 +32,14 @@ use Spatie\Activitylog\Support\LogOptions;
 ])]
 class User extends Authenticatable
 {
+    use HasApiTokens;
+
     /** @use HasFactory<UserFactory> */
     use HasFactory;
-    use Notifiable;
-    use HasApiTokens;
     use HasRoles;
-    use SoftDeletes;
     use LogsAuditTrail;
+    use Notifiable;
+    use SoftDeletes;
 
     protected function casts(): array
     {
@@ -108,7 +108,7 @@ class User extends Authenticatable
      */
     public function belongsToHotel(Hotel|int $hotel): bool
     {
-        $hotelId = $hotel instanceof Hotel ? $hotel->id: $hotel;
+        $hotelId = $hotel instanceof Hotel ? $hotel->id : $hotel;
 
         return $this->hotels()
             ->whereKey($hotelId)

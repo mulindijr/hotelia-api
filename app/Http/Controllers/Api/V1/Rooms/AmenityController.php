@@ -11,10 +11,10 @@ use App\Services\Room\AmenityService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Spatie\QueryBuilder\QueryBuilder;
 use OpenApi\Attributes as OA;
+use Spatie\QueryBuilder\QueryBuilder;
 
-#[OA\Tag(name: "Amenities", description: "Global and room amenity management operations")]
+#[OA\Tag(name: 'Amenities', description: 'Global and room amenity management operations')]
 class AmenityController extends Controller
 {
     use AuthorizesRequests;
@@ -24,17 +24,17 @@ class AmenityController extends Controller
     ) {}
 
     #[OA\Get(
-        path: "/api/v1/amenities",
-        summary: "Display a listing of amenities",
-        tags: ["Amenities"],
-        security: [["sanctum" => []]],
+        path: '/api/v1/amenities',
+        summary: 'Display a listing of amenities',
+        tags: ['Amenities'],
+        security: [['sanctum' => []]],
         parameters: [
-            new OA\Parameter(name: "per_page", in: "query", required: false, schema: new OA\Schema(type: "integer", default: 15)),
-            new OA\Parameter(name: "filter[name]", in: "query", required: false, schema: new OA\Schema(type: "string"))
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 15)),
+            new OA\Parameter(name: 'filter[name]', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Amenities list retrieved successfully"),
-            new OA\Response(response: 401, description: "Unauthenticated")
+            new OA\Response(response: 200, description: 'Amenities list retrieved successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
         ]
     )]
     public function index(Request $request): JsonResponse
@@ -54,24 +54,24 @@ class AmenityController extends Controller
     }
 
     #[OA\Post(
-        path: "/api/v1/amenities",
-        summary: "Store a newly created amenity",
-        tags: ["Amenities"],
-        security: [["sanctum" => []]],
+        path: '/api/v1/amenities',
+        summary: 'Store a newly created amenity',
+        tags: ['Amenities'],
+        security: [['sanctum' => []]],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["name"],
+                required: ['name'],
                 properties: [
-                    new OA\Property(property: "name", type: "string", example: "WiFi"),
-                    new OA\Property(property: "description", type: "string", example: "High-speed wireless internet access")
+                    new OA\Property(property: 'name', type: 'string', example: 'WiFi'),
+                    new OA\Property(property: 'description', type: 'string', example: 'High-speed wireless internet access'),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 201, description: "Amenity created successfully"),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 422, description: "Validation failed")
+            new OA\Response(response: 201, description: 'Amenity created successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 422, description: 'Validation failed'),
         ]
     )]
     public function store(StoreAmenityRequest $request): JsonResponse
@@ -88,27 +88,27 @@ class AmenityController extends Controller
     }
 
     #[OA\Put(
-        path: "/api/v1/amenities/{amenity}",
-        summary: "Update the specified amenity",
-        tags: ["Amenities"],
-        security: [["sanctum" => []]],
+        path: '/api/v1/amenities/{amenity}',
+        summary: 'Update the specified amenity',
+        tags: ['Amenities'],
+        security: [['sanctum' => []]],
         parameters: [
-            new OA\Parameter(name: "amenity", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: 'amenity', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 properties: [
-                    new OA\Property(property: "name", type: "string", example: "WiFi"),
-                    new OA\Property(property: "description", type: "string", example: "High-speed wireless internet access")
+                    new OA\Property(property: 'name', type: 'string', example: 'WiFi'),
+                    new OA\Property(property: 'description', type: 'string', example: 'High-speed wireless internet access'),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Amenity updated successfully"),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 404, description: "Amenity not found"),
-            new OA\Response(response: 422, description: "Validation failed")
+            new OA\Response(response: 200, description: 'Amenity updated successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 404, description: 'Amenity not found'),
+            new OA\Response(response: 422, description: 'Validation failed'),
         ]
     )]
     public function update(UpdateAmenityRequest $request, Amenity $amenity): JsonResponse
@@ -125,17 +125,17 @@ class AmenityController extends Controller
     }
 
     #[OA\Delete(
-        path: "/api/v1/amenities/{amenity}",
-        summary: "Remove the specified amenity",
-        tags: ["Amenities"],
-        security: [["sanctum" => []]],
+        path: '/api/v1/amenities/{amenity}',
+        summary: 'Remove the specified amenity',
+        tags: ['Amenities'],
+        security: [['sanctum' => []]],
         parameters: [
-            new OA\Parameter(name: "amenity", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: 'amenity', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Amenity deleted successfully"),
-            new OA\Response(response: 401, description: "Unauthenticated"),
-            new OA\Response(response: 404, description: "Amenity not found")
+            new OA\Response(response: 200, description: 'Amenity deleted successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 404, description: 'Amenity not found'),
         ]
     )]
     public function destroy(Amenity $amenity): JsonResponse

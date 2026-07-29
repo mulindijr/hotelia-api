@@ -1,18 +1,18 @@
 <?php
 
 namespace App\Models;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Traits\LogsAuditTrail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\LogsAuditTrail;
 use Illuminate\Support\Facades\Auth;
 
 class Booking extends Model
 {
     use HasFactory;
-    use SoftDeletes;
     use LogsAuditTrail;
+    use SoftDeletes;
 
     protected $fillable = [
         'booking_reference',

@@ -10,6 +10,7 @@ class UpdatePricingRuleRequest extends FormRequest
     {
         $hotel = $this->route('hotel');
         $pricingRule = $this->route('pricing_rule');
+
         return $this->user()->can('update', [$pricingRule, $hotel]);
     }
 

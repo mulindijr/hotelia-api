@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PricingRule extends Model
 {
-    use HasFactory, SoftDeletes, LogsAuditTrail;
+    use HasFactory, LogsAuditTrail, SoftDeletes;
 
     protected $fillable = [
         'hotel_id',

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Api\V1\Rooms;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+
 class StoreAmenityRequest extends FormRequest
 {
     /**
