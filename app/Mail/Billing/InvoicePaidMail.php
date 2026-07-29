@@ -20,7 +20,7 @@ class InvoicePaidMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Invoice Paid - Thank You - ' . $this->invoice->invoice_number,
+            subject: 'Invoice Paid - Thank You - '.$this->invoice->invoice_number,
         );
     }
 

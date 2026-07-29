@@ -2,6 +2,8 @@
 
 namespace App\Services\Billing;
 
+use App\Events\Billing\InvoiceGenerated;
+use App\Events\Billing\InvoicePaid;
 use App\Models\Booking;
 use App\Models\Invoice;
 use App\Models\Payment;
@@ -19,7 +21,7 @@ class BillingService
     {
         $invoice = $booking->invoices()->first();
 
-        if (!$invoice) {
+        if (! $invoice) {
             $invoice = $this->regenerateInvoice($booking);
         }
 
@@ -78,13 +80,13 @@ class BillingService
             // 3.5. Add early check-in and late check-out fees if applicable
             if ($booking->actual_check_in_at) {
                 $actualCheckIn = Carbon::parse($booking->actual_check_in_at);
-                $scheduledCheckInLimit = Carbon::parse($booking->check_in_date->toDateString() . ' ' . ($settings->check_in_time ?? '14:00'));
+                $scheduledCheckInLimit = Carbon::parse($booking->check_in_date->toDateString().' '.($settings->check_in_time ?? '14:00'));
                 if ($actualCheckIn->lt($scheduledCheckInLimit)) {
                     $earlyFee = $settings->early_checkin_fee ?? 0.00;
                     if ($earlyFee > 0) {
                         $subtotal += $earlyFee;
                         $itemsData[] = [
-                            'description' => "Early Check-in Fee",
+                            'description' => 'Early Check-in Fee',
                             'quantity' => 1,
                             'unit_price' => $earlyFee,
                             'total_price' => $earlyFee,
@@ -95,14 +97,14 @@ class BillingService
 
             if ($booking->actual_check_out_at) {
                 $actualCheckOut = Carbon::parse($booking->actual_check_out_at);
-                $scheduledCheckOutLimit = Carbon::parse($booking->check_out_date->toDateString() . ' ' . ($settings->check_out_time ?? '11:00'))
+                $scheduledCheckOutLimit = Carbon::parse($booking->check_out_date->toDateString().' '.($settings->check_out_time ?? '11:00'))
                     ->addMinutes($settings->default_checkout_grace_minutes ?? 0);
                 if ($actualCheckOut->gt($scheduledCheckOutLimit)) {
                     $lateFee = $settings->late_checkout_fee ?? 0.00;
                     if ($lateFee > 0) {
                         $subtotal += $lateFee;
                         $itemsData[] = [
-                            'description' => "Late Check-out Fee",
+                            'description' => 'Late Check-out Fee',
                             'quantity' => 1,
                             'unit_price' => $lateFee,
                             'total_price' => $lateFee,
@@ -117,10 +119,10 @@ class BillingService
             // 4. Save Invoice
             $invoice = $booking->invoices()->first();
 
-            if (!$invoice) {
+            if (! $invoice) {
                 $prefix = $settings->invoice_prefix ?? 'INV-';
                 do {
-                    $invoiceNumber = $prefix . date('Ymd') . strtoupper(Str::random(4));
+                    $invoiceNumber = $prefix.date('Ymd').strtoupper(Str::random(4));
                 } while (Invoice::where('invoice_number', $invoiceNumber)->exists());
 
                 $invoice = Invoice::create([
@@ -149,7 +151,7 @@ class BillingService
             $this->recalculateInvoiceStatus($booking);
 
             $freshInvoice = $invoice->fresh('items');
-            event(new \App\Events\Billing\InvoiceGenerated($freshInvoice));
+            event(new InvoiceGenerated($freshInvoice));
 
             return $freshInvoice;
         });
@@ -194,7 +196,7 @@ class BillingService
     public function recalculateInvoiceStatus(Booking $booking): void
     {
         $invoice = $booking->invoices()->first();
-        if (!$invoice) {
+        if (! $invoice) {
             return;
         }
 
@@ -213,7 +215,7 @@ class BillingService
         $invoice->update(['status' => $status]);
 
         if ($status === 'paid' && $oldStatus !== 'paid') {
-            event(new \App\Events\Billing\InvoicePaid($invoice));
+            event(new InvoicePaid($invoice));
         }
     }
 }

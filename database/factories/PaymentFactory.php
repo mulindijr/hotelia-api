@@ -46,7 +46,7 @@ class PaymentFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => 'completed',
-            'transaction_reference' => 'TXN-' . fake()->unique()->bothify('#########??'),
+            'transaction_reference' => 'TXN-'.fake()->unique()->bothify('#########??'),
         ]);
     }
 
@@ -67,7 +67,7 @@ class PaymentFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => 'refunded',
-            'transaction_reference' => 'REF-' . fake()->unique()->bothify('#########??'),
+            'transaction_reference' => 'REF-'.fake()->unique()->bothify('#########??'),
         ]);
     }
 }

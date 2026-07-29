@@ -3,18 +3,13 @@
 namespace Tests\Feature\Performance;
 
 use App\Models\Hotel;
-
-use App\Models\HotelSetting;
-use App\Models\RoomType;
 use App\Models\Service;
-
 use App\Services\Hotel\AncillaryService;
 use App\Services\Hotel\HotelSettingService;
 use App\Services\Report\ReportService;
 use App\Services\Room\RoomTypeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
-
 use Tests\TestCase;
 
 class PerformanceCachingTest extends TestCase

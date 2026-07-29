@@ -5,8 +5,9 @@ namespace Tests\Unit\Policies;
 use App\Models\Amenity;
 use App\Models\User;
 use App\Policies\AmenityPolicy;
-use Tests\TestCase;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class AmenityPolicyTest extends TestCase
 {
@@ -17,8 +18,8 @@ class AmenityPolicyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->policy = new AmenityPolicy();
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->policy = new AmenityPolicy;
     }
 
     public function test_super_admin_bypasses_all_checks(): void

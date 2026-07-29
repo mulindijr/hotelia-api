@@ -4,14 +4,14 @@ namespace Tests\Feature\Api\V1\Bookings;
 
 use App\Constants\BookingStatus;
 use App\Constants\RoomStatus;
-use App\Models\Booking;
-use App\Models\Guest;
-use App\Models\Room;
-use App\Models\RoomType;
 use App\Mail\Bookings\BookingCancelledMail;
 use App\Mail\Bookings\BookingConfirmationMail;
 use App\Mail\Bookings\BookingNoShowMail;
 use App\Mail\Bookings\BookingUpdatedMail;
+use App\Models\Booking;
+use App\Models\Guest;
+use App\Models\Room;
+use App\Models\RoomType;
 use Illuminate\Support\Facades\Mail;
 use Tests\ApiTestCase;
 use Tests\Traits\InteractsWithHotels;

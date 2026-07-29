@@ -2,9 +2,28 @@
 
 namespace App\Providers;
 
+use App\Events\Billing\InvoiceGenerated;
+use App\Events\Billing\InvoicePaid;
+use App\Events\Bookings\BookingCancelled;
+use App\Events\Bookings\BookingCheckedIn;
+use App\Events\Bookings\BookingCheckedOut;
+use App\Events\Bookings\BookingCreated;
+use App\Events\Bookings\BookingUpdated;
+use App\Events\Housekeeping\HousekeepingTaskCreated;
+use App\Events\Housekeeping\HousekeepingTaskDeleted;
+use App\Events\Housekeeping\HousekeepingTaskUpdated;
+use App\Events\Maintenance\MaintenanceRequestCreated;
+use App\Events\Maintenance\MaintenanceRequestDeleted;
+use App\Events\Maintenance\MaintenanceRequestUpdated;
+use App\Listeners\Billing\SendInvoiceNotification;
+use App\Listeners\Bookings\SendBookingNotification;
+use App\Listeners\Bookings\SendGuestBookingMailNotification;
+use App\Listeners\Housekeeping\SendHousekeepingTaskNotification;
+use App\Listeners\Maintenance\SendMaintenanceRequestNotification;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,77 +43,77 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         ResetPassword::createUrlUsing(function ($user, string $token) {
-            return config('frontend.url') . '/reset-password?token=' . $token . '&email=' . urlencode($user->email);
+            return config('frontend.url').'/reset-password?token='.$token.'&email='.urlencode($user->email);
         });
 
         $this->configureRateLimiting();
 
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Bookings\BookingCreated::class,
-            \App\Listeners\Bookings\SendBookingNotification::class
+        Event::listen(
+            BookingCreated::class,
+            SendBookingNotification::class
         );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Bookings\BookingCreated::class,
-            \App\Listeners\Bookings\SendGuestBookingMailNotification::class
-        );
-
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Bookings\BookingCancelled::class,
-            \App\Listeners\Bookings\SendBookingNotification::class
-        );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Bookings\BookingCancelled::class,
-            \App\Listeners\Bookings\SendGuestBookingMailNotification::class
+        Event::listen(
+            BookingCreated::class,
+            SendGuestBookingMailNotification::class
         );
 
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Bookings\BookingUpdated::class,
-            \App\Listeners\Bookings\SendGuestBookingMailNotification::class
+        Event::listen(
+            BookingCancelled::class,
+            SendBookingNotification::class
         );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Bookings\BookingUpdated::class,
-            \App\Listeners\Bookings\SendBookingNotification::class
+        Event::listen(
+            BookingCancelled::class,
+            SendGuestBookingMailNotification::class
         );
 
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Bookings\BookingCheckedIn::class,
-            \App\Listeners\Bookings\SendBookingNotification::class
+        Event::listen(
+            BookingUpdated::class,
+            SendGuestBookingMailNotification::class
         );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Bookings\BookingCheckedOut::class,
-            \App\Listeners\Bookings\SendBookingNotification::class
+        Event::listen(
+            BookingUpdated::class,
+            SendBookingNotification::class
         );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Housekeeping\HousekeepingTaskCreated::class,
-            \App\Listeners\Housekeeping\SendHousekeepingTaskNotification::class
+
+        Event::listen(
+            BookingCheckedIn::class,
+            SendBookingNotification::class
         );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Housekeeping\HousekeepingTaskUpdated::class,
-            \App\Listeners\Housekeeping\SendHousekeepingTaskNotification::class
+        Event::listen(
+            BookingCheckedOut::class,
+            SendBookingNotification::class
         );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Housekeeping\HousekeepingTaskDeleted::class,
-            \App\Listeners\Housekeeping\SendHousekeepingTaskNotification::class
+        Event::listen(
+            HousekeepingTaskCreated::class,
+            SendHousekeepingTaskNotification::class
         );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Maintenance\MaintenanceRequestCreated::class,
-            \App\Listeners\Maintenance\SendMaintenanceRequestNotification::class
+        Event::listen(
+            HousekeepingTaskUpdated::class,
+            SendHousekeepingTaskNotification::class
         );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Maintenance\MaintenanceRequestUpdated::class,
-            \App\Listeners\Maintenance\SendMaintenanceRequestNotification::class
+        Event::listen(
+            HousekeepingTaskDeleted::class,
+            SendHousekeepingTaskNotification::class
         );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Maintenance\MaintenanceRequestDeleted::class,
-            \App\Listeners\Maintenance\SendMaintenanceRequestNotification::class
+        Event::listen(
+            MaintenanceRequestCreated::class,
+            SendMaintenanceRequestNotification::class
         );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Billing\InvoiceGenerated::class,
-            \App\Listeners\Billing\SendInvoiceNotification::class
+        Event::listen(
+            MaintenanceRequestUpdated::class,
+            SendMaintenanceRequestNotification::class
         );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\Billing\InvoicePaid::class,
-            \App\Listeners\Billing\SendInvoiceNotification::class
+        Event::listen(
+            MaintenanceRequestDeleted::class,
+            SendMaintenanceRequestNotification::class
+        );
+        Event::listen(
+            InvoiceGenerated::class,
+            SendInvoiceNotification::class
+        );
+        Event::listen(
+            InvoicePaid::class,
+            SendInvoiceNotification::class
         );
     }
 

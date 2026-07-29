@@ -46,15 +46,15 @@ class UserService
                 'email' => $data['email'] ?? null,
                 'phone' => $data['phone'] ?? null,
                 'is_active' => isset($data['is_active']) ? (bool) $data['is_active'] : null,
-            ], fn ($val) => !is_null($val));
+            ], fn ($val) => ! is_null($val));
 
-            if (!empty($data['password'])) {
+            if (! empty($data['password'])) {
                 $updateFields['password'] = $data['password'];
             }
 
             $user->update($updateFields);
 
-            if (!empty($data['role'])) {
+            if (! empty($data['role'])) {
                 $user->syncRoles([$data['role']]);
             }
 
@@ -71,7 +71,7 @@ class UserService
             $user->hotels()->detach($hotel->id);
 
             // If the user has no remaining associated hotels and is not a super admin, soft-delete them
-            if ($user->hotels()->count() === 0 && !$user->hasRole('super_admin')) {
+            if ($user->hotels()->count() === 0 && ! $user->hasRole('super_admin')) {
                 $user->delete();
             }
         });

@@ -27,9 +27,9 @@ return new class extends Migration
                 'occupied',
                 'reserved',
                 'cleaning',
-                'maintenance'
+                'maintenance',
             ])->default('available');
-            
+
             $table->timestamps();
 
             $table->softDeletes();

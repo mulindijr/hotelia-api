@@ -7,8 +7,9 @@ use App\Models\MaintenanceRequest;
 use App\Models\Room;
 use App\Models\User;
 use App\Policies\MaintenanceRequestPolicy;
-use Tests\TestCase;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class MaintenanceRequestPolicyTest extends TestCase
 {
@@ -19,8 +20,8 @@ class MaintenanceRequestPolicyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->policy = new MaintenanceRequestPolicy();
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->policy = new MaintenanceRequestPolicy;
     }
 
     public function test_super_admin_bypasses_all_checks(): void

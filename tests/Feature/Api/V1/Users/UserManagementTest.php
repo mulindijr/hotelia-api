@@ -4,7 +4,6 @@ namespace Tests\Feature\Api\V1\Users;
 
 use App\Models\Hotel;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
 use Tests\ApiTestCase;
 use Tests\Traits\InteractsWithHotels;
 
@@ -42,14 +41,14 @@ class UserManagementTest extends ApiTestCase
                         'roles',
                         'created_at',
                         'updated_at',
-                    ]
+                    ],
                 ],
                 'meta' => [
                     'current_page',
                     'last_page',
                     'per_page',
                     'total',
-                ]
+                ],
             ]);
     }
 

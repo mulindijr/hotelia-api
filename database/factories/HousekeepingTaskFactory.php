@@ -58,7 +58,7 @@ class HousekeepingTaskFactory extends Factory
     public function completed(): static
     {
         $scheduled = fake()->dateTimeBetween('-2 days', 'now');
-        $completed = (clone $scheduled)->modify('+' . fake()->numberBetween(30, 90) . ' minutes');
+        $completed = (clone $scheduled)->modify('+'.fake()->numberBetween(30, 90).' minutes');
 
         return $this->state([
             'status' => 'completed',

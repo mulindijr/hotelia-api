@@ -3,11 +3,11 @@
 namespace App\Services\Report;
 
 use App\Models\Hotel;
+use App\Models\HousekeepingTask;
 use App\Models\Invoice;
+use App\Models\MaintenanceRequest;
 use App\Models\Payment;
 use App\Models\Room;
-use App\Models\HousekeepingTask;
-use App\Models\MaintenanceRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;

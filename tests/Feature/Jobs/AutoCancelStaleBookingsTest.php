@@ -5,13 +5,12 @@ namespace Tests\Feature\Jobs;
 use App\Constants\BookingStatus;
 use App\Jobs\AutoCancelStaleBookings;
 use App\Models\Booking;
-
 use App\Models\Guest;
 use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\RoomType;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use Tests\TestCase;
 
 class AutoCancelStaleBookingsTest extends TestCase
@@ -21,7 +20,7 @@ class AutoCancelStaleBookingsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
+        $this->seed(RolesAndPermissionsSeeder::class);
     }
 
     public function test_auto_cancel_stale_bookings_cancels_old_pending_bookings(): void

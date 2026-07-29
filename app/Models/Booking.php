@@ -18,6 +18,7 @@ class Booking extends Model
         'booking_reference',
         'hotel_id',
         'guest_id',
+        'rate_plan_id',
         'check_in_date',
         'check_out_date',
         'adults',
@@ -47,6 +48,11 @@ class Booking extends Model
     public function guest()
     {
         return $this->belongsTo(Guest::class);
+    }
+
+    public function ratePlan()
+    {
+        return $this->belongsTo(RatePlan::class);
     }
 
     public function rooms()

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->enum('status', [
                 'pending',
                 'in_progress',
-                'completed'
+                'completed',
             ])->default('pending');
 
             $table->dateTime('scheduled_at')->nullable();

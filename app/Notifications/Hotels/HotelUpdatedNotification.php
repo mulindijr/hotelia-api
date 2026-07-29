@@ -64,7 +64,7 @@ class HotelUpdatedNotification extends BaseNotification
     {
         return [
             'hotel',
-            'hotel:' . $this->hotel->id,
+            'hotel:'.$this->hotel->id,
             NotificationTypes::HOTEL_UPDATED,
         ];
     }

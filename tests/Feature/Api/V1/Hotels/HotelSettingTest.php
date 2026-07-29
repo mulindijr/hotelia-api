@@ -18,7 +18,7 @@ class HotelSettingTest extends ApiTestCase
     {
         $user = $this->actingAsRole('hotel_manager');
         $hotel = $this->createHotelForUser($user);
-        
+
         $setting = HotelSetting::factory()->create(['hotel_id' => $hotel->id]);
 
         $response = $this->getJson(route('hotels.settings.show', $hotel));

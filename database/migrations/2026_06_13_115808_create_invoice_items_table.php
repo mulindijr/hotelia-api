@@ -17,11 +17,11 @@ return new class extends Migration
             $table->foreignId('invoice_id')->constrained()->cascadeOnDelete();
 
             $table->string('description');
-        
+
             $table->integer('quantity')->default(1);
-        
+
             $table->decimal('unit_price', 12, 2);
-        
+
             $table->decimal('total_price', 12, 2);
 
             $table->timestamps();

@@ -2,8 +2,8 @@
 
 namespace App\Listeners\Hotels;
 
-use App\Events\Hotels\HotelUpdated;
 use App\Constants\Roles;
+use App\Events\Hotels\HotelUpdated;
 use App\Models\User;
 use App\Notifications\Hotels\HotelUpdatedNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;

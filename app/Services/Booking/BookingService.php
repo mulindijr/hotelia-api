@@ -12,9 +12,12 @@ use App\Events\Bookings\BookingUpdated;
 use App\Models\Booking;
 use App\Models\Hotel;
 use App\Models\HousekeepingTask;
+use App\Models\RatePlan;
 use App\Models\Room;
 use App\Models\Service;
+use App\Services\Billing\BillingService;
 use App\Services\Hotel\HotelSettingService;
+use App\Services\Pricing\PricingService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -31,6 +34,12 @@ class BookingService
             $roomIds = $data['rooms'];
             $checkInDate = $data['check_in_date'];
             $checkOutDate = $data['check_out_date'];
+            $ratePlanId = $data['rate_plan_id'] ?? null;
+
+            $ratePlan = null;
+            if ($ratePlanId) {
+                $ratePlan = RatePlan::where('hotel_id', $hotel->id)->find($ratePlanId);
+            }
 
             // 1. Lock target rooms for update to prevent concurrent double-bookings
             $rooms = Room::whereIn('id', $roomIds)
@@ -48,7 +57,7 @@ class BookingService
                 })
                 ->where(function ($query) use ($checkInDate, $checkOutDate) {
                     $query->where('check_in_date', '<', $checkOutDate)
-                          ->where('check_out_date', '>', $checkInDate);
+                        ->where('check_out_date', '>', $checkInDate);
                 })
                 ->exists();
 
@@ -57,7 +66,7 @@ class BookingService
             $isOverbooked = false;
             if ($conflictingBookings) {
                 $allowOverbooking = $settings->allow_overbooking ?? false;
-                if (!$allowOverbooking) {
+                if (! $allowOverbooking) {
                     throw ValidationException::withMessages([
                         'rooms' => 'One or more selected rooms are no longer available for the selected date range.',
                     ]);
@@ -68,7 +77,7 @@ class BookingService
             // 3. Generate unique booking reference
             $prefix = $settings->booking_prefix ?? 'BK-';
             do {
-                $ref = $prefix . date('Ymd') . strtoupper(Str::random(4));
+                $ref = $prefix.date('Ymd').strtoupper(Str::random(4));
             } while (Booking::where('booking_reference', $ref)->exists());
 
             // 4. Compute room cost & nights
@@ -76,12 +85,32 @@ class BookingService
             $checkOut = Carbon::parse($checkOutDate);
             $nights = max(1, $checkIn->diffInDays($checkOut));
 
-            $totalRoomCost = $rooms->sum(fn($r) => $r->roomType->base_price * $nights);
+            $pricingService = app(PricingService::class);
+            $totalRoomCost = 0;
+            $roomNightlyPrices = [];
+
+            foreach ($rooms as $room) {
+                $roomTotal = 0;
+                $current = $checkIn->copy();
+                while ($current->lt($checkOut)) {
+                    $nightPrice = $pricingService->calculateNightlyPrice(
+                        $room->roomType,
+                        $ratePlan,
+                        $current,
+                        $nights
+                    );
+                    $roomTotal += $nightPrice;
+                    $current->addDay();
+                }
+                $avgPricePerNight = round($roomTotal / $nights, 2);
+                $roomNightlyPrices[$room->id] = $avgPricePerNight;
+                $totalRoomCost += $roomTotal;
+            }
 
             // 5. Attach services and compute cost
             $servicesCost = 0;
             $servicesData = [];
-            if (!empty($data['services'])) {
+            if (! empty($data['services'])) {
                 $services = Service::whereIn('id', collect($data['services'])->pluck('id'))
                     ->where('hotel_id', $hotel->id)
                     ->get()
@@ -108,6 +137,7 @@ class BookingService
                 'booking_reference' => $ref,
                 'hotel_id' => $hotel->id,
                 'guest_id' => $data['guest_id'],
+                'rate_plan_id' => $ratePlan?->id,
                 'check_in_date' => $checkInDate,
                 'check_out_date' => $checkOutDate,
                 'adults' => $data['adults'] ?? 1,
@@ -120,8 +150,8 @@ class BookingService
 
             // 7. Attach rooms
             foreach ($rooms as $room) {
-                $booking->rooms()->attach($room->id, ['price_per_night' => $room->roomType->base_price]);
-                
+                $booking->rooms()->attach($room->id, ['price_per_night' => $roomNightlyPrices[$room->id]]);
+
                 // Set room status to reserved if the booking status is active/pending/confirmed
                 if (in_array($status, [BookingStatus::PENDING, BookingStatus::CONFIRMED])) {
                     $room->update(['status' => RoomStatus::RESERVED]);
@@ -129,7 +159,7 @@ class BookingService
             }
 
             // 8. Attach services
-            if (!empty($servicesData)) {
+            if (! empty($servicesData)) {
                 $booking->services()->attach($servicesData);
             }
 
@@ -157,7 +187,7 @@ class BookingService
             // Sync and compute rooms
             $roomIds = $data['rooms'] ?? $booking->rooms()->pluck('rooms.id')->toArray();
             $rooms = Room::whereIn('id', $roomIds)->with('roomType')->lockForUpdate()->get();
-            
+
             // Check conflicts for rooms/dates if changed
             $conflictingBookings = Booking::where('hotel_id', $booking->hotel_id)
                 ->where('id', '!=', $booking->id)
@@ -168,7 +198,7 @@ class BookingService
                 })
                 ->where(function ($query) use ($checkIn, $checkOut) {
                     $query->where('check_in_date', '<', $checkOut)
-                          ->where('check_out_date', '>', $checkIn);
+                        ->where('check_out_date', '>', $checkIn);
                 })
                 ->exists();
 
@@ -177,7 +207,7 @@ class BookingService
             $isOverbooked = $booking->is_overbooked;
             if ($conflictingBookings) {
                 $allowOverbooking = $settings->allow_overbooking ?? false;
-                if (!$allowOverbooking) {
+                if (! $allowOverbooking) {
                     throw ValidationException::withMessages([
                         'rooms' => 'One or more selected rooms are no longer available for the selected date range.',
                     ]);
@@ -187,7 +217,7 @@ class BookingService
                 $isOverbooked = false;
             }
 
-            $totalRoomCost = $rooms->sum(fn($r) => $r->roomType->base_price * $nights);
+            $totalRoomCost = $rooms->sum(fn ($r) => $r->roomType->base_price * $nights);
 
             // Sync and compute services
             $servicesCost = 0;
@@ -205,7 +235,7 @@ class BookingService
                 }
                 $booking->services()->sync($servicesData);
             } else {
-                $servicesCost = $booking->services()->get()->sum(fn($s) => $s->pivot->price * $s->pivot->quantity);
+                $servicesCost = $booking->services()->get()->sum(fn ($s) => $s->pivot->price * $s->pivot->quantity);
             }
 
             $totalAmount = $totalRoomCost + $servicesCost;
@@ -230,7 +260,7 @@ class BookingService
             $newStatus = $booking->status;
             // 1. Release removed rooms
             $removedRoomIds = array_diff($oldRoomIds, $roomIds);
-            if (!empty($removedRoomIds)) {
+            if (! empty($removedRoomIds)) {
                 Room::whereIn('id', $removedRoomIds)->update(['status' => RoomStatus::AVAILABLE]);
             }
             // 2. Set statuses for current rooms based on booking status
@@ -265,11 +295,11 @@ class BookingService
                 $settings = app(HotelSettingService::class)->getSettings($booking->hotel);
                 $cancellationHours = $settings->booking_cancellation_hours ?? 24;
                 $checkInTimeSetting = $settings->check_in_time ?? '14:00';
-                $scheduledCheckIn = Carbon::parse($booking->check_in_date->toDateString() . ' ' . $checkInTimeSetting);
+                $scheduledCheckIn = Carbon::parse($booking->check_in_date->toDateString().' '.$checkInTimeSetting);
 
                 if (now()->diffInHours($scheduledCheckIn, false) < $cancellationHours) {
                     throw ValidationException::withMessages([
-                        'status' => "The booking cannot be cancelled because the cancellation window of {$cancellationHours} hours has passed."
+                        'status' => "The booking cannot be cancelled because the cancellation window of {$cancellationHours} hours has passed.",
                     ]);
                 }
             }
@@ -306,7 +336,7 @@ class BookingService
             }
 
             // Regenerate invoice to apply early check-in fees if applicable
-            app(\App\Services\Billing\BillingService::class)->regenerateInvoice($booking);
+            app(BillingService::class)->regenerateInvoice($booking);
 
             event(new BookingCheckedIn($booking));
 
@@ -339,7 +369,7 @@ class BookingService
             }
 
             // Regenerate invoice to apply late check-out fees if applicable
-            app(\App\Services\Billing\BillingService::class)->regenerateInvoice($booking);
+            app(BillingService::class)->regenerateInvoice($booking);
 
             event(new BookingCheckedOut($booking));
 
@@ -401,9 +431,9 @@ class BookingService
             BookingStatus::NO_SHOW => [],
         ];
 
-        if (!in_array($newStatus, $allowed[$oldStatus] ?? [])) {
+        if (! in_array($newStatus, $allowed[$oldStatus] ?? [])) {
             throw ValidationException::withMessages([
-                'status' => "Invalid status transition from '{$oldStatus}' to '{$newStatus}'."
+                'status' => "Invalid status transition from '{$oldStatus}' to '{$newStatus}'.",
             ]);
         }
     }

@@ -13,7 +13,7 @@ class AuthTest extends ApiTestCase
     {
         parent::setUp();
         // Clear rate limiter state between tests so each test starts clean
-        RateLimiter::clear('auth-login|' . request()->ip());
+        RateLimiter::clear('auth-login|'.request()->ip());
     }
 
     /**
@@ -22,13 +22,13 @@ class AuthTest extends ApiTestCase
     public function test_user_can_login_with_valid_credentials(): void
     {
         $user = User::factory()->create([
-            'email'     => 'auth.test@example.com',
-            'password'  => Hash::make('password123'),
+            'email' => 'auth.test@example.com',
+            'password' => Hash::make('password123'),
             'is_active' => true,
         ]);
 
         $response = $this->postJson(route('auth.login'), [
-            'email'    => 'auth.test@example.com',
+            'email' => 'auth.test@example.com',
             'password' => 'password123',
         ]);
 
@@ -43,12 +43,12 @@ class AuthTest extends ApiTestCase
     public function test_login_fails_with_invalid_credentials(): void
     {
         User::factory()->create([
-            'email'    => 'bad.auth@example.com',
+            'email' => 'bad.auth@example.com',
             'password' => Hash::make('password123'),
         ]);
 
         $response = $this->postJson(route('auth.login'), [
-            'email'    => 'bad.auth@example.com',
+            'email' => 'bad.auth@example.com',
             'password' => 'wrongpassword',
         ]);
 
@@ -75,21 +75,21 @@ class AuthTest extends ApiTestCase
     public function test_login_rate_limiter_blocks_after_five_attempts(): void
     {
         User::factory()->create([
-            'email'    => 'ratelimit@example.com',
+            'email' => 'ratelimit@example.com',
             'password' => Hash::make('password123'),
         ]);
 
         // Hit the endpoint 5 times with wrong credentials
         for ($i = 0; $i < 5; $i++) {
             $this->postJson(route('auth.login'), [
-                'email'    => 'ratelimit@example.com',
+                'email' => 'ratelimit@example.com',
                 'password' => 'wrongpassword',
             ]);
         }
 
         // The 6th attempt should be throttled
         $response = $this->postJson(route('auth.login'), [
-            'email'    => 'ratelimit@example.com',
+            'email' => 'ratelimit@example.com',
             'password' => 'wrongpassword',
         ]);
 
@@ -166,8 +166,8 @@ class AuthTest extends ApiTestCase
         $this->actingAs($user, 'sanctum');
 
         $response = $this->postJson(route('auth.change-password'), [
-            'current_password'          => 'OldPassword1!',
-            'new_password'              => 'NewPassword2@',
+            'current_password' => 'OldPassword1!',
+            'new_password' => 'NewPassword2@',
             'new_password_confirmation' => 'NewPassword2@',
         ]);
 
@@ -190,8 +190,8 @@ class AuthTest extends ApiTestCase
 
         // Weak password: no uppercase, no symbol, too simple
         $response = $this->postJson(route('auth.change-password'), [
-            'current_password'          => 'OldPassword1!',
-            'new_password'              => 'simple123',
+            'current_password' => 'OldPassword1!',
+            'new_password' => 'simple123',
             'new_password_confirmation' => 'simple123',
         ]);
 
@@ -200,4 +200,3 @@ class AuthTest extends ApiTestCase
             ->assertJsonStructure(['success', 'message', 'errors']);
     }
 }
-

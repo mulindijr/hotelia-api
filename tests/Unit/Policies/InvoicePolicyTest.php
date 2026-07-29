@@ -7,8 +7,9 @@ use App\Models\Hotel;
 use App\Models\Invoice;
 use App\Models\User;
 use App\Policies\InvoicePolicy;
-use Tests\TestCase;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class InvoicePolicyTest extends TestCase
 {
@@ -19,8 +20,8 @@ class InvoicePolicyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->policy = new InvoicePolicy();
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->policy = new InvoicePolicy;
     }
 
     public function test_super_admin_bypasses_all_checks(): void

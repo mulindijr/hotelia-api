@@ -14,7 +14,7 @@ trait InteractsWithHotels
     {
         $hotel = Hotel::factory()->create($hotelAttributes);
         $hotel->users()->attach($user->id);
-        
+
         return $hotel;
     }
 }

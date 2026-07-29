@@ -22,10 +22,10 @@ class BookingFactory extends Factory
     public function definition(): array
     {
         $checkIn = fake()->dateTimeBetween('now', '+30 days');
-        $checkOut = (clone $checkIn)->modify('+' . fake()->numberBetween(1, 5) . ' days');
+        $checkOut = (clone $checkIn)->modify('+'.fake()->numberBetween(1, 5).' days');
 
         return [
-            'booking_reference' => 'BK-' . fake()->unique()->bothify('#####??'),
+            'booking_reference' => 'BK-'.fake()->unique()->bothify('#####??'),
             'hotel_id' => Hotel::factory(),
             'guest_id' => Guest::factory(),
             'check_in_date' => $checkIn->format('Y-m-d'),
@@ -64,7 +64,7 @@ class BookingFactory extends Factory
     public function checkedIn(): static
     {
         $checkIn = fake()->dateTimeBetween('-3 days', 'now');
-        $checkOut = (clone $checkIn)->modify('+' . fake()->numberBetween(1, 5) . ' days');
+        $checkOut = (clone $checkIn)->modify('+'.fake()->numberBetween(1, 5).' days');
 
         return $this->state([
             'status' => 'checked_in',
@@ -79,7 +79,7 @@ class BookingFactory extends Factory
     public function checkedOut(): static
     {
         $checkIn = fake()->dateTimeBetween('-10 days', '-5 days');
-        $checkOut = (clone $checkIn)->modify('+' . fake()->numberBetween(1, 5) . ' days');
+        $checkOut = (clone $checkIn)->modify('+'.fake()->numberBetween(1, 5).' days');
 
         return $this->state([
             'status' => 'checked_out',

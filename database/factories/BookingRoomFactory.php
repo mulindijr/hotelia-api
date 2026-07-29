@@ -30,11 +30,12 @@ class BookingRoomFactory extends Factory
                 $hotelId = $booking ? $booking->hotel_id : Hotel::factory()->create()->id;
 
                 return Room::factory()->create([
-                    'hotel_id' => $hotelId
+                    'hotel_id' => $hotelId,
                 ])->id;
             },
             'price_per_night' => function (array $attributes) {
                 $room = Room::find($attributes['room_id']);
+
                 return $room && $room->roomType ? $room->roomType->base_price : 3500.00;
             },
         ];

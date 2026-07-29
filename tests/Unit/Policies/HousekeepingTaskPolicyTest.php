@@ -7,8 +7,9 @@ use App\Models\HousekeepingTask;
 use App\Models\Room;
 use App\Models\User;
 use App\Policies\HousekeepingTaskPolicy;
-use Tests\TestCase;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class HousekeepingTaskPolicyTest extends TestCase
 {
@@ -19,8 +20,8 @@ class HousekeepingTaskPolicyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
-        $this->policy = new HousekeepingTaskPolicy();
+        $this->seed(RolesAndPermissionsSeeder::class);
+        $this->policy = new HousekeepingTaskPolicy;
     }
 
     public function test_super_admin_bypasses_all_checks(): void

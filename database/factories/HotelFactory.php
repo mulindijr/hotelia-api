@@ -20,7 +20,7 @@ class HotelFactory extends Factory
      */
     public function definition(): array
     {
-        $name = fake()->unique()->company() . ' Resort';
+        $name = fake()->unique()->company().' Resort';
 
         return [
             'name' => $name,
@@ -62,8 +62,8 @@ class HotelFactory extends Factory
     public function luxury(): static
     {
         return $this->state(fn (array $attributes) => [
-            'name' => 'The Grand ' . $attributes['name'],
-            'slug' => Str::slug('The Grand ' . $attributes['name']),
+            'name' => 'The Grand '.$attributes['name'],
+            'slug' => Str::slug('The Grand '.$attributes['name']),
             'description' => 'A luxury 5-star resort offering premium services, fine dining, and full spa facilities.',
         ]);
     }
@@ -74,8 +74,8 @@ class HotelFactory extends Factory
     public function budget(): static
     {
         return $this->state(fn (array $attributes) => [
-            'name' => $attributes['name'] . ' Inn',
-            'slug' => Str::slug($attributes['name'] . ' Inn'),
+            'name' => $attributes['name'].' Inn',
+            'slug' => Str::slug($attributes['name'].' Inn'),
             'description' => 'Affordable and cozy accommodations offering essential amenities for cost-conscious travelers.',
         ]);
     }

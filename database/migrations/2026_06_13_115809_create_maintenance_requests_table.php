@@ -27,13 +27,13 @@ return new class extends Migration
                 'low',
                 'medium',
                 'high',
-                'critical'
+                'critical',
             ])->default('medium');
 
             $table->enum('status', [
                 'open',
                 'in_progress',
-                'resolved'
+                'resolved',
             ])->default('open');
 
             $table->timestamps();

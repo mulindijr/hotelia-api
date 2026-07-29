@@ -17,9 +17,9 @@ return new class extends Migration
             $table->foreignId('room_id')->constrained()->cascadeOnDelete();
 
             $table->string('old_status')->nullable();
-        
+
             $table->string('new_status');
-        
+
             $table->foreignId('changed_by')
                 ->nullable()
                 ->constrained('users')

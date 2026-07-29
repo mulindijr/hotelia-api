@@ -20,7 +20,7 @@ class BookingNoShowMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Booking No-Show Notice - ' . $this->booking->booking_reference,
+            subject: 'Booking No-Show Notice - '.$this->booking->booking_reference,
         );
     }
 

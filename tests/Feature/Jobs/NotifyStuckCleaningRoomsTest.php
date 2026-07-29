@@ -2,18 +2,17 @@
 
 namespace Tests\Feature\Jobs;
 
+use App\Constants\Permissions;
 use App\Constants\RoomStatus;
 use App\Jobs\NotifyStuckCleaningRooms;
 use App\Models\Hotel;
-
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\User;
-
 use App\Notifications\Housekeeping\StuckInCleaningNotification;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
-
 use Tests\TestCase;
 
 class NotifyStuckCleaningRoomsTest extends TestCase
@@ -24,7 +23,7 @@ class NotifyStuckCleaningRoomsTest extends TestCase
     {
         Notification::fake();
 
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
+        $this->seed(RolesAndPermissionsSeeder::class);
 
         $hotel = Hotel::factory()->create();
         $manager = User::factory()->create();
@@ -65,12 +64,12 @@ class NotifyStuckCleaningRoomsTest extends TestCase
     {
         Notification::fake();
 
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
+        $this->seed(RolesAndPermissionsSeeder::class);
 
         $hotel = Hotel::factory()->create();
         $housekeeper = User::factory()->create();
         $housekeeper->hotels()->attach($hotel->id);
-        $housekeeper->givePermissionTo(\App\Constants\Permissions::VIEW_HOUSEKEEPING);
+        $housekeeper->givePermissionTo(Permissions::VIEW_HOUSEKEEPING);
 
         $roomType = RoomType::factory()->create(['hotel_id' => $hotel->id]);
 

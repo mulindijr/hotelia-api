@@ -14,12 +14,12 @@ class SendMaintenanceRequestNotification
     {
         $request = $event->request;
         $room = $request->room;
-        if (!$room) {
+        if (! $room) {
             return;
         }
 
         $hotel = $room->hotel;
-        if (!$hotel) {
+        if (! $hotel) {
             return;
         }
 

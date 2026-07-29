@@ -13,6 +13,7 @@ use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\Service;
 use App\Models\User;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -21,17 +22,18 @@ class PaginationFilterTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Hotel $hotel;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
+        $this->seed(RolesAndPermissionsSeeder::class);
 
         // Create user with super_admin role to bypass all gates
         $this->user = User::factory()->create();
         $this->user->assignRole('super_admin');
-        
+
         $this->hotel = Hotel::factory()->create();
         $this->user->hotels()->attach($this->hotel->id);
     }

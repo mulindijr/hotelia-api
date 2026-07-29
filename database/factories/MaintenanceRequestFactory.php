@@ -29,7 +29,7 @@ class MaintenanceRequestFactory extends Factory
                 'Air conditioner not cooling properly.',
                 'Flickering ceiling light.',
                 'Broken TV remote.',
-                'Door lock card reader not responding.'
+                'Door lock card reader not responding.',
             ]),
             'priority' => 'medium',
             'status' => 'open',
