@@ -8,13 +8,14 @@
 [![PHPUnit](https://img.shields.io/badge/Tests-PHPUnit_12-blue?style=for-the-badge&logo=php&logoColor=white)](https://phpunit.de)
 [![API](https://img.shields.io/badge/API-RESTful_v1-orange?style=for-the-badge)](https://swagger.io)
 
-**Hotelia API** is a production-ready, multi-tenant RESTful API backend for a commercial Hotel Property Management System (PMS). Built with Laravel 13, it supports full hotel operations — from reservations and front-desk management to billing, housekeeping, maintenance, and real-time audit trails.
+**Hotelia API** is a multi-tenant RESTful API backend for a Hotel Property Management System (PMS). Built with Laravel 13, it supports hotel operations — from reservations and front-desk management to billing, housekeeping, maintenance, dynamic pricing, and real-time audit trails.
 
 ---
 
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
+- [Project Status](#-project-status)
 - [Features](#-features)
 - [Technology Stack](#-technology-stack)
 - [Installed Packages](#-installed-packages)
@@ -47,6 +48,8 @@
 - Manages multiple hotels and their staff under one system (multi-tenancy via hotel-user pivot)
 - Handles the full guest journey: reservation → check-in → check-out → invoicing → payment
 - Automates housekeeping workflows triggered by guest check-out
+- Calculates dynamic nightly rates via rate plans and pricing rules
+- Exposes a room availability matrix with per-night pricing for date ranges
 - Tracks maintenance requests tied to specific rooms
 - Generates financial reports including ADR and RevPAR KPIs
 - Enforces fine-grained, role-based access control across every endpoint
@@ -70,6 +73,20 @@
 
 ---
 
+## 📊 Project Status
+
+Hotelia API is a **headless backend** — there is no admin UI, guest portal, or mobile app in this repository. The API layer is substantially complete; the remaining work is mostly integrations, a frontend, and production operations.
+
+| Scope | Completion | Notes |
+|---|---|---|
+| **Core backend API** | ~78% | Auth, hotels, rooms, bookings, billing, housekeeping, maintenance, reports, pricing, availability |
+| **Full commercial product** | ~45% | Requires UI, payment gateways, OTA/channel sync, onboarding, and deployment tooling |
+| **Test suite** | 231 tests | Feature, unit, job, and performance coverage (run `composer run test`) |
+
+See the [Roadmap](#-roadmap) for what is implemented vs. still planned.
+
+---
+
 ## ✨ Features
 
 ### 🔐 Authentication
@@ -87,7 +104,7 @@
 
 - Role-Based Access Control (RBAC) via **Spatie Laravel Permission**
 - Five defined roles: `super_admin`, `hotel_manager`, `receptionist`, `housekeeper`, `accountant`
-- 40+ granular permissions (e.g., `view bookings`, `check in guests`, `manage housekeeping`)
+- 45 granular permissions (e.g., `view bookings`, `check in guests`, `manage rate plans`)
 - Permission-based middleware on every protected route
 - Laravel **Policies** for object-level authorization (e.g., ensuring a booking belongs to the correct hotel)
 - Cross-tenant route binding protection via scoped bindings
@@ -129,7 +146,8 @@
 - Create bookings with **pessimistic locking** to prevent double-bookings under concurrent requests
 - Date-range overlap detection before any room assignment
 - Automatic booking reference number generation with hotel-specific prefix
-- Automatic total amount computation (nights × room base price + ancillary services)
+- Optional **rate plan** attachment per booking (BAR, corporate, group, etc.)
+- Automatic total amount computation via `PricingService` (nightly rate × nights + ancillary services)
 - Booking status lifecycle: `pending` → `confirmed` → `checked_in` → `checked_out` | `cancelled` | `no_show`
 - Booking status history automatically recorded on every transition
 - Attach ancillary services to bookings with quantity and price
@@ -151,6 +169,37 @@
 - Invoice status auto-calculated: `unpaid` → `partial` → `paid`
 - Invoice number generation with hotel-specific prefix
 - Invoice regeneration endpoint (recomputes all line items)
+- **PDF invoice download** via DomPDF (`GET .../invoice/pdf`)
+
+### 💰 Pricing & Rate Plans
+
+- Named rate plans per hotel (code, modifier type, cancellation policy, meal plan)
+- Percentage or fixed price modifiers applied on top of room type base price
+- **Pricing rules** with date ranges, day-of-week filters, min/max stay, and priority ordering
+- Modifier types: `override`, `percentage`, or `fixed` adjustments
+- Rules can be scoped globally, to a rate plan, or to a specific room type
+- Rate plan selection integrated into booking creation and availability pricing
+
+### 📆 Room Availability
+
+- Availability matrix endpoint: `GET /api/v1/hotels/{hotel}/availability`
+- Per room type, per day: total rooms, booked count, available count, and calculated nightly price
+- Filterable by date range, room type, and rate plan
+- Uses active booking overlap logic (excludes cancelled and no-show bookings)
+
+### 📧 Transactional Email
+
+- Guest booking emails: confirmation, update, cancellation, and no-show
+- Billing emails: invoice generated and invoice paid
+- Password reset via signed tokenized email link (Laravel `ResetPassword` + `FRONTEND_URL`)
+- Blade email templates under `resources/views/emails/`
+- Triggered by domain events through dedicated mail listeners (configure SMTP in `.env`)
+
+### 📄 PDF Documents
+
+- Invoice PDF generation with line items, tax breakdown, and hotel branding fields
+- Payment receipt PDF download per completed payment
+- Rendered via **barryvdh/laravel-dompdf** with Blade templates under `resources/views/pdf/`
 
 ### 🧹 Housekeeping
 
@@ -168,9 +217,9 @@
 - Notifications dispatched on request creation
 - Integrated with housekeeping: completed cleaning defers to `maintenance` status if requests are open
 
-### 🔔 Notifications
+### 🔔 In-App Notifications
 
-- In-app (database-channel) notifications for bookings, housekeeping, and maintenance events
+- Database-channel notifications for bookings, housekeeping, and maintenance events
 - Notification listing and mark-as-read endpoints
 - `BaseNotification` abstract class for consistent notification structure
 - Notification types managed via `NotificationTypes` constants class
@@ -224,6 +273,7 @@
 | **API Documentation** | L5-Swagger (OpenAPI 3.0) |
 | **Audit Logging** | Spatie Laravel Activity Log 5.x |
 | **API Querying** | Spatie Laravel Query Builder 7.x |
+| **PDF Generation** | barryvdh/laravel-dompdf 3.x |
 | **Testing** | PHPUnit 12.x |
 | **Code Style** | Laravel Pint |
 | **IDE Support** | Barryvdh Laravel IDE Helper |
@@ -245,6 +295,7 @@
 | `spatie/laravel-permission` | ^8.0 | Roles & permissions (RBAC) |
 | `spatie/laravel-activitylog` | ^5.0 | Audit logging |
 | `spatie/laravel-query-builder` | ^7.3 | Filtering, sorting & pagination |
+| `barryvdh/laravel-dompdf` | ^3.1 | Invoice and payment receipt PDF generation |
 | `darkaonline/l5-swagger` | ^11.0 | OpenAPI / Swagger documentation |
 
 ### Development Dependencies
@@ -305,11 +356,12 @@ hotelia-api/
 │   │   ├── InvoiceStatus.php
 │   │   ├── NotificationTypes.php
 │   │   ├── PaymentStatus.php
-│   │   ├── Permissions.php         # All 40+ permission strings
+│   │   ├── Permissions.php         # All 45 permission strings
 │   │   ├── Roles.php               # Roles enum (super_admin, hotel_manager, etc.)
 │   │   └── RoomStatus.php          # available, occupied, cleaning, maintenance, reserved
 │   │
 │   ├── Events/                     # Domain events by module
+│   │   ├── Billing/                # InvoiceGenerated, InvoicePaid
 │   │   ├── Bookings/               # BookingCreated, BookingCancelled, BookingCheckedIn, BookingCheckedOut, BookingUpdated
 │   │   ├── Guests/                 # GuestCreated, GuestUpdated, GuestDeleted
 │   │   ├── Hotels/                 # HotelCreated, HotelUpdated, HotelDeleted, HotelSettingUpdated
@@ -329,8 +381,9 @@ hotelia-api/
 │   │   │   ├── Housekeeping/       # HousekeepingController
 │   │   │   ├── Maintenance/        # MaintenanceController
 │   │   │   ├── Notifications/      # NotificationController
+│   │   │   ├── Pricing/            # RatePlanController, PricingRuleController
 │   │   │   ├── Reports/            # ReportController
-│   │   │   ├── Rooms/              # RoomController, RoomTypeController, AmenityController
+│   │   │   ├── Rooms/              # RoomController, RoomTypeController, AmenityController, AvailabilityController
 │   │   │   ├── Security/           # SecurityController (login history, failed logins)
 │   │   │   ├── Services/           # ServiceController
 │   │   │   └── Users/              # UserController
@@ -346,10 +399,15 @@ hotelia-api/
 │   │   └── NotifyStuckCleaningRooms.php    # Alerts staff about rooms stuck in cleaning
 │   │
 │   ├── Listeners/                  # Event listeners grouped by domain
-│   │   ├── Bookings/               # SendBookingNotification
+│   │   ├── Billing/                # SendInvoiceNotification
+│   │   ├── Bookings/               # SendBookingNotification, SendGuestBookingMailNotification
 │   │   ├── Hotels/                 # LogHotelCreated, LogHotelUpdated, LogHotelDeleted, LogHotelSettingUpdated, NotifySuperAdmins*
 │   │   ├── Housekeeping/           # SendHousekeepingTaskNotification
 │   │   └── Maintenance/            # SendMaintenanceRequestNotification
+│   │
+│   ├── Mail/                       # Transactional mailable classes
+│   │   ├── Billing/                # InvoiceGeneratedMail, InvoicePaidMail
+│   │   └── Bookings/               # BookingConfirmationMail, BookingCancelledMail, BookingUpdatedMail, BookingNoShowMail
 │   │
 │   ├── Models/                     # Eloquent models
 │   │   ├── Booking.php             # With BookingStatusHistory boot hook
@@ -367,6 +425,8 @@ hotelia-api/
 │   │   ├── MaintenanceRequest.php
 │   │   ├── PasswordHistory.php
 │   │   ├── Payment.php
+│   │   ├── PricingRule.php
+│   │   ├── RatePlan.php
 │   │   ├── Room.php
 │   │   ├── RoomStatusHistory.php
 │   │   ├── RoomType.php
@@ -390,6 +450,8 @@ hotelia-api/
 │   │   ├── InvoicePolicy.php
 │   │   ├── MaintenanceRequestPolicy.php
 │   │   ├── PaymentPolicy.php
+│   │   ├── PricingRulePolicy.php
+│   │   ├── RatePlanPolicy.php
 │   │   ├── RoomPolicy.php
 │   │   ├── RoomTypePolicy.php
 │   │   ├── ServicePolicy.php
@@ -405,8 +467,10 @@ hotelia-api/
 │   │   ├── Hotel/                  # HotelService, HotelSettingService, AncillaryService
 │   │   ├── Housekeeping/           # HousekeepingService (task lifecycle + room status sync)
 │   │   ├── Maintenance/            # MaintenanceService
+│   │   ├── Pdf/                    # PdfService (invoice and receipt rendering)
+│   │   ├── Pricing/                # PricingService (nightly rate calculation)
 │   │   ├── Report/                 # ReportService (dashboard stats, revenue KPIs)
-│   │   ├── Room/                   # RoomService, RoomTypeService, AmenityService
+│   │   ├── Room/                   # RoomService, RoomTypeService, AmenityService, AvailabilityService
 │   │   └── User/                   # UserService
 │   │
 │   └── Traits/
@@ -414,7 +478,7 @@ hotelia-api/
 │
 ├── database/
 │   ├── factories/                  # Eloquent model factories for all entities
-│   ├── migrations/                 # 25+ ordered migrations
+│   ├── migrations/                 # 34 ordered migrations
 │   └── seeders/
 │       ├── DatabaseSeeder.php
 │       ├── DemoDataSeeder.php
@@ -433,6 +497,7 @@ hotelia-api/
 │       ├── housekeeping.php
 │       ├── maintenance.php
 │       ├── notifications.php
+│       ├── pricing.php             # Rate plans & pricing rules
 │       ├── reports.php             # Dashboard & revenue reports
 │       ├── rooms.php               # Rooms, room types, amenities
 │       ├── security.php            # Login history, failed logins
@@ -445,7 +510,8 @@ hotelia-api/
     ├── Feature/Jobs/               # Scheduled job tests
     ├── Feature/Performance/        # Caching performance tests
     ├── Traits/InteractsWithHotels.php
-    └── Unit/Policies/              # Policy unit tests
+    ├── Unit/Policies/              # Policy unit tests
+    └── Unit/Services/              # Service unit tests (e.g. PricingService)
 ```
 
 ---
@@ -472,6 +538,8 @@ The database is designed around a **multi-hotel tenancy** model, where every res
 | `booking_services` | Pivot - ancillary services per booking with quantity and price snapshot |
 | `booking_status_histories` | Immutable audit trail of every booking status change |
 | `services` | Ancillary services per hotel (e.g., airport transfer, spa) |
+| `rate_plans` | Named rate plans with modifiers, policies, and default flags |
+| `pricing_rules` | Date/day/stay-based price rules scoped to hotel, rate plan, or room type |
 | `invoices` | Auto-generated invoices per booking with tax computation |
 | `invoice_items` | Line items: room stays + service charges |
 | `payments` | Payment transactions per booking (method, amount, status, reference) |
@@ -494,6 +562,8 @@ Hotel ──< Booking ──< BookingRoom >── Room
                   └──< BookingService >── Service
                   └──< Invoice ──< InvoiceItem
                   └──< Payment
+                  └──> RatePlan (optional)
+Hotel ──< RatePlan ──< PricingRule
 Hotel >──< User (via hotel_user pivot)
 RoomType >──< Amenity (via room_type_amenity pivot)
 ```
@@ -550,12 +620,15 @@ Tokens are issued on login and revoked on logout or password change.
 | Hotel Settings | `/api/v1/hotels/{hotel}/settings` | show, update |
 | Room Types | `/api/v1/hotels/{hotel}/room-types` | CRUD |
 | Rooms | `/api/v1/hotels/{hotel}/rooms` | CRUD |
+| Availability | `/api/v1/hotels/{hotel}/availability` | index (date-range matrix with pricing) |
 | Amenities | `/api/v1/amenities` | index, store, update, destroy |
+| Rate Plans | `/api/v1/hotels/{hotel}/rate-plans` | CRUD |
+| Pricing Rules | `/api/v1/hotels/{hotel}/pricing-rules` | CRUD |
 | Guests | `/api/v1/hotels/{hotel}/guests` | CRUD |
 | Services | `/api/v1/hotels/{hotel}/services` | CRUD |
 | Bookings | `/api/v1/hotels/{hotel}/bookings` | CRUD + cancel, check-in, check-out |
-| Invoices | `/api/v1/hotels/{hotel}/bookings/{booking}/invoice` | show, regenerate |
-| Payments | `/api/v1/hotels/{hotel}/bookings/{booking}/payments` | index, store, update status |
+| Invoices | `/api/v1/hotels/{hotel}/bookings/{booking}/invoice` | show, regenerate, PDF download |
+| Payments | `/api/v1/hotels/{hotel}/bookings/{booking}/payments` | index, store, update status, receipt PDF |
 | Housekeeping | `/api/v1/hotels/{hotel}/housekeeping` | CRUD |
 | Maintenance | `/api/v1/hotels/{hotel}/maintenance` | CRUD |
 | Notifications | `/api/v1/notifications` | index, mark-as-read |
@@ -605,7 +678,7 @@ All responses follow a consistent envelope:
 | Feature | Implementation |
 |---|---|
 | **API Authentication** | Laravel Sanctum - stateless Bearer tokens |
-| **Role-Based Access Control** | Spatie Permission - 5 roles, 40+ permissions |
+| **Role-Based Access Control** | Spatie Permission - 5 roles, 45 permissions |
 | **Object-Level Authorization** | Laravel Policies - hotel-scoped ownership enforced on every mutation |
 | **Cross-Tenant Isolation** | `scopeBindings()` on all nested hotel routes |
 | **Account Lockout** | Auto-lock after 3 failed attempts, 15-minute cooldown |
@@ -627,12 +700,21 @@ Events are registered in `AppServiceProvider::boot()`.
 | Event | Listener | Purpose |
 |---|---|---|
 | `BookingCreated` | `SendBookingNotification` | Notifies relevant hotel staff of new booking |
+| `BookingCreated` | `SendGuestBookingMailNotification` | Sends booking confirmation email to guest |
+| `BookingUpdated` | `SendBookingNotification` | Notifies staff of booking changes |
+| `BookingUpdated` | `SendGuestBookingMailNotification` | Sends update or no-show email to guest |
 | `BookingCancelled` | `SendBookingNotification` | Notifies staff of cancellation |
+| `BookingCancelled` | `SendGuestBookingMailNotification` | Sends cancellation email to guest |
 | `BookingCheckedIn` | `SendBookingNotification` | Notifies staff of guest check-in |
 | `BookingCheckedOut` | `SendBookingNotification` | Notifies staff of guest check-out |
+| `InvoiceGenerated` | `SendInvoiceNotification` | Sends invoice email to guest |
+| `InvoicePaid` | `SendInvoiceNotification` | Sends paid-invoice email to guest |
 | `HousekeepingTaskCreated` | `SendHousekeepingTaskNotification` | Notifies housekeeping team of new task |
 | `HousekeepingTaskUpdated` | `SendHousekeepingTaskNotification` | Notifies on task status changes |
+| `HousekeepingTaskDeleted` | `SendHousekeepingTaskNotification` | Notifies on task deletion |
 | `MaintenanceRequestCreated` | `SendMaintenanceRequestNotification` | Notifies maintenance staff of new request |
+| `MaintenanceRequestUpdated` | `SendMaintenanceRequestNotification` | Notifies on maintenance status changes |
+| `MaintenanceRequestDeleted` | `SendMaintenanceRequestNotification` | Notifies on maintenance request deletion |
 
 Additional events exist for hotels, guests, rooms, room types, amenities, and services — these are dispatched for activity-log observability and future extensibility, but do not currently have active listeners beyond audit logging.
 
@@ -640,7 +722,9 @@ Additional events exist for hotels, guests, rooms, room types, amenities, and se
 
 ## 🔔 Notifications
 
-All notifications use the **database channel** (stored in `notifications` table) and extend `BaseNotification`.
+### In-App (Database Channel)
+
+All in-app notifications use the **database channel** (stored in `notifications` table) and extend `BaseNotification`.
 
 | Notification | Trigger | Recipients |
 |---|---|---|
@@ -650,6 +734,19 @@ All notifications use the **database channel** (stored in `notifications` table)
 | `HousekeepingTaskNotification` | Housekeeping task created or updated | Housekeeping-permissioned staff |
 | `StuckInCleaningNotification` | Room stuck in `cleaning` status for > N minutes | Housekeeping-permissioned staff (with cooldown deduplication via cache) |
 | `MaintenanceRequestNotification` | Maintenance request created | Maintenance-permissioned staff |
+
+### Email (SMTP)
+
+Transactional emails are sent synchronously via Laravel Mail when SMTP is configured. See [Transactional Email](#-transactional-email) under Features.
+
+| Mailable | Trigger | Recipient |
+|---|---|---|
+| `BookingConfirmationMail` | Booking created | Guest |
+| `BookingUpdatedMail` | Booking updated | Guest |
+| `BookingCancelledMail` | Booking cancelled | Guest |
+| `BookingNoShowMail` | Booking marked no-show | Guest |
+| `InvoiceGeneratedMail` | Invoice generated | Guest |
+| `InvoicePaidMail` | Invoice fully paid | Guest |
 
 ---
 
@@ -857,9 +954,10 @@ php artisan test --coverage-html coverage/
 |---|---|---|
 | **Feature / Auth** | `tests/Feature/Api/V1/Auth/` | Login, logout, password change, token refresh |
 | **Feature / Hotels** | `tests/Feature/Api/V1/Hotels/` | Hotel CRUD, settings |
-| **Feature / Rooms** | `tests/Feature/Api/V1/Rooms/` | Rooms, room types, amenities |
-| **Feature / Bookings** | `tests/Feature/Api/V1/Bookings/` | Full booking lifecycle |
-| **Feature / Billing** | `tests/Feature/Api/V1/Billing/` | Invoices, payments, reconciliation |
+| **Feature / Rooms** | `tests/Feature/Api/V1/Rooms/` | Rooms, room types, amenities, availability |
+| **Feature / Bookings** | `tests/Feature/Api/V1/Bookings/` | Full booking lifecycle, email notifications |
+| **Feature / Billing** | `tests/Feature/Api/V1/Billing/` | Invoices, payments, PDF, email notifications |
+| **Feature / Pricing** | `tests/Feature/Api/V1/Pricing/` | Rate plans, pricing rules |
 | **Feature / Guests** | `tests/Feature/Api/V1/Guests/` | Guest management |
 | **Feature / Housekeeping** | `tests/Feature/Api/V1/Housekeeping/` | Task lifecycle + checkout integration |
 | **Feature / Maintenance** | `tests/Feature/Api/V1/Maintenance/` | Maintenance request CRUD |
@@ -870,7 +968,8 @@ php artisan test --coverage-html coverage/
 | **Feature / Users** | `tests/Feature/Api/V1/Users/` | User management |
 | **Feature / Jobs** | `tests/Feature/Jobs/` | AutoCancelStaleBookings, NotifyStuckCleaningRooms |
 | **Feature / Performance** | `tests/Feature/Performance/` | Report caching behavior |
-| **Unit / Policies** | `tests/Unit/Policies/` | Booking, Room, RoomType, Service, Housekeeping, Maintenance, HotelSetting policies |
+| **Unit / Policies** | `tests/Unit/Policies/` | Booking, Room, RoomType, Service, Housekeeping, Maintenance, HotelSetting, RatePlan, PricingRule policies |
+| **Unit / Services** | `tests/Unit/Services/` | PricingService nightly rate calculation |
 
 ---
 
@@ -951,21 +1050,30 @@ php artisan ide-helper:models
 
 ## 🗺️ Roadmap
 
-The following modules have not yet been implemented:
+### ✅ Implemented
 
-| Module | Status | Description |
-|---|---|---|
-| **Email Notifications** | 🔲 Planned | Send transactional emails (booking confirmation, invoice, password reset via SMTP) |
-| **Channel Management** | 🔲 Planned | OTA integration (Booking.com, Expedia) via channel manager adapter |
-| **Online Payments** | 🔲 Planned | Payment gateway integration (Stripe, Flutterwave, M-Pesa Daraja API) |
-| **Room Availability Calendar** | 🔲 Planned | Dedicated availability query endpoint with calendar view data |
-| **Dynamic Pricing Engine** | 🔲 Planned | Season-based, demand-based, or day-of-week price rules per room type |
-| **Guest Portal API** | 🔲 Planned | Self-service endpoints for guests to view bookings and invoices |
-| **Bulk Operations** | 🔲 Planned | Bulk check-in, bulk housekeeping task assignment |
-| **Webhook System** | 🔲 Planned | Outbound webhooks for third-party integrations |
-| **Multi-Currency Billing** | 🔲 Planned | Invoice generation in hotel's configured currency with FX conversion |
-| **Staff Scheduling** | 🔲 Planned | Shift management for housekeeping and maintenance staff |
-| **Rate Plans** | 🔲 Planned | Named rate plans (e.g., BAR, corporate, group) attached to bookings |
+| Module | Description |
+|---|---|
+| **Rate Plans** | Named plans (BAR, corporate, group) with modifiers attached to bookings |
+| **Dynamic Pricing Engine** | Date-range, day-of-week, and stay-length pricing rules with priority ordering |
+| **Room Availability Matrix** | Date-range availability query with per-night pricing |
+| **Transactional Email** | Guest booking and invoice emails via SMTP (requires mail configuration) |
+| **PDF Documents** | Invoice and payment receipt PDF downloads |
+
+### 🔲 Planned
+
+| Module | Description |
+|---|---|
+| **Admin UI** | Web front desk dashboard for hotel staff |
+| **Channel Management** | OTA integration (Booking.com, Expedia) via channel manager adapter |
+| **Online Payments** | Payment gateway integration (Stripe, Flutterwave, M-Pesa Daraja API) |
+| **Guest Portal API** | Self-service endpoints for guests to view bookings and invoices |
+| **Bulk Operations** | Bulk check-in, bulk housekeeping task assignment |
+| **Webhook System** | Outbound webhooks for third-party integrations |
+| **Multi-Currency Billing** | Invoice generation with FX conversion beyond hotel-configured currency |
+| **Staff Scheduling** | Shift management for housekeeping and maintenance staff |
+| **Queued Email Delivery** | Move transactional mail to queued jobs for production reliability |
+| **CI/CD & Deployment** | Docker, GitHub Actions, staging/production runbooks |
 
 ---
 
@@ -1012,6 +1120,6 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 <div align="center">
 
-Built with ❤️ using [Laravel](https://laravel.com) · [Spatie](https://spatie.be) · [L5-Swagger](https://github.com/DarkaOnLine/L5-Swagger)
+Built with ❤️ using [Laravel](https://laravel.com) · [Spatie](https://spatie.be) · [L5-Swagger](https://github.com/DarkaOnLine/L5-Swagger) · [DomPDF](https://github.com/barryvdh/laravel-dompdf)
 
 </div>
