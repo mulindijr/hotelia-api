@@ -42,7 +42,7 @@ class AuditController extends Controller
                 'id'
             )
             ->latest()
-            ->paginate(10);
+            ->paginate(request()->query('per_page', 15));
 
         return response()->json($logs);
     }
