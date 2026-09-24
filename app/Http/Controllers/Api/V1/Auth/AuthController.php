@@ -109,12 +109,19 @@ class AuthController extends Controller
             'logged_in_at' => now(),
         ]);
 
+        // Temporarily disable team ID so global roles are loaded
+        $currentTeamId = getPermissionsTeamId();
+        setPermissionsTeamId(null);
         $user->load('roles');
+        setPermissionsTeamId($currentTeamId);
+
+        $userArray = $user->toArray();
+        $userArray['is_super_admin'] = $user->isSuperAdmin();
 
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
-            'user' => $user,
+            'user' => $userArray,
             'permissions' => $user->getAllPermissions()->pluck('name'),
         ]);
     }
@@ -131,8 +138,17 @@ class AuthController extends Controller
     )]
     public function me(Request $request)
     {
+        // Temporarily disable team ID to load global roles correctly
+        $currentTeamId = getPermissionsTeamId();
+        setPermissionsTeamId(null);
+        $user = $request->user()->load('roles', 'permissions');
+        setPermissionsTeamId($currentTeamId);
+
+        $userArray = $user->toArray();
+        $userArray['is_super_admin'] = $user->isSuperAdmin();
+
         return response()->json([
-            'user' => $request->user()->load('roles', 'permissions'),
+            'user' => $userArray,
         ]);
     }
 
