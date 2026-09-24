@@ -10,10 +10,18 @@ use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Spatie automatically scopes this to the active team/hotel based on getPermissionsTeamId()
-        $roles = Role::with('permissions')->orderBy('name')->get();
+        // Get both global roles (hotel_id = null) and hotel-specific roles
+        $teamId = getPermissionsTeamId();
+        
+        $roles = Role::with('permissions')
+            ->where(function ($query) use ($teamId) {
+                $query->whereNull('hotel_id')
+                      ->orWhere('hotel_id', $teamId);
+            })
+            ->orderBy('name')
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -23,7 +31,11 @@ class RoleController extends Controller
 
     public function store(StoreRoleRequest $request)
     {
-        // team_id (hotel_id) is automatically appended by Spatie if teams is true
+        if ($request->boolean('is_global') && $request->user()->hasRole('super_admin')) {
+            setPermissionsTeamId(null);
+        }
+
+        // team_id (hotel_id) is automatically appended by Spatie based on getPermissionsTeamId()
         $role = Role::create([
             'name' => $request->name,
             'guard_name' => 'web',
@@ -50,6 +62,10 @@ class RoleController extends Controller
 
     public function update(UpdateRoleRequest $request, Role $role)
     {
+        if ($request->boolean('is_global') && $request->user()->hasRole('super_admin')) {
+            $role->hotel_id = null;
+        }
+
         $role->update([
             'name' => $request->name,
         ]);
