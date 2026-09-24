@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->prefix('hotels')->group(function () {
 
-    Route::get('/', [HotelController::class, 'index'])->middleware('permission:'.Permissions::VIEW_HOTELS)->name('hotels.index');
+    Route::get('/', [HotelController::class, 'index'])->name('hotels.index');
 
     Route::post('/', [HotelController::class, 'store'])->middleware('permission:'.Permissions::CREATE_HOTELS)->name('hotels.store');
 
