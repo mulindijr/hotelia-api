@@ -114,4 +114,17 @@ class User extends Authenticatable
             ->whereKey($hotelId)
             ->exists();
     }
+
+    /**
+     * Check if user is a global super admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        $currentTeamId = getPermissionsTeamId();
+        setPermissionsTeamId(null);
+        $isSuperAdmin = $this->hasRole('super_admin');
+        setPermissionsTeamId($currentTeamId);
+
+        return $isSuperAdmin;
+    }
 }

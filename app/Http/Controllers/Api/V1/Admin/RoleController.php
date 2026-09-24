@@ -31,7 +31,7 @@ class RoleController extends Controller
 
     public function store(StoreRoleRequest $request)
     {
-        if ($request->boolean('is_global') && $request->user()->hasRole('super_admin')) {
+        if ($request->boolean('is_global') && $request->user()->isSuperAdmin()) {
             setPermissionsTeamId(null);
         }
 
@@ -62,7 +62,7 @@ class RoleController extends Controller
 
     public function update(UpdateRoleRequest $request, Role $role)
     {
-        if ($request->boolean('is_global') && $request->user()->hasRole('super_admin')) {
+        if ($request->boolean('is_global') && $request->user()->isSuperAdmin()) {
             $role->hotel_id = null;
         }
 
