@@ -51,7 +51,8 @@ class MaintenanceController extends Controller
                 'priority',
                 'room_id',
             ])
-            ->with('room')
+            
+            ->allowedIncludes(['room', 'reportedBy', 'resolvedBy'])->with('room')
             ->paginate($request->query('per_page', 15));
 
         return MaintenanceRequestResource::collection($requests)->additional([
