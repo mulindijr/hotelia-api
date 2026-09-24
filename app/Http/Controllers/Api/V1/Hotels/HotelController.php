@@ -44,7 +44,7 @@ class HotelController extends Controller
 
         $query = Hotel::query()->with('settings');
 
-        if (! $request->user()->hasRole('super_admin')) {
+        if (! $request->user()->isSuperAdmin()) {
             $query->whereHas('users', function ($q) use ($request) {
                 $q->where('users.id', $request->user()->id);
             });
