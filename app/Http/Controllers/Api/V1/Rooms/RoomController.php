@@ -47,7 +47,8 @@ class RoomController extends Controller
                 'status',
                 'room_type_id',
             ])
-            ->with('roomType')
+            
+            ->allowedIncludes(['roomType'])->with('roomType')
             ->paginate($request->query('per_page', 15));
 
         return RoomResource::collection($rooms)->additional([
