@@ -20,9 +20,11 @@ class StoreRoleRequest extends FormRequest
                 'string',
                 'max:255',
                 Rule::unique('roles', 'name')->where(function ($query) {
-                    return $query->where('hotel_id', getPermissionsTeamId());
+                    $teamId = request()->boolean('is_global') ? null : getPermissionsTeamId();
+                    return $query->where('hotel_id', $teamId);
                 }),
             ],
+            'is_global' => ['nullable', 'boolean'],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['string', 'exists:permissions,name'],
         ];
