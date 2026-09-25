@@ -120,11 +120,11 @@ class User extends Authenticatable
      */
     public function isSuperAdmin(): bool
     {
-        $currentTeamId = getPermissionsTeamId();
-        setPermissionsTeamId(null);
-        $isSuperAdmin = $this->hasRole('super_admin');
-        setPermissionsTeamId($currentTeamId);
-
-        return $isSuperAdmin;
+        return \Illuminate\Support\Facades\DB::table('model_has_roles')
+            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->where('model_has_roles.model_type', static::class)
+            ->where('model_has_roles.model_id', $this->id)
+            ->where('roles.name', 'super_admin')
+            ->exists();
     }
 }
