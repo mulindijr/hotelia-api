@@ -84,7 +84,7 @@ class PaymentController extends Controller
                 'payment_method',
             ])
             
-            ->allowedIncludes(['booking'])->latest()
+            ->allowedIncludes('booking')->latest()
             ->paginate($request->query('per_page', 15));
 
         return PaymentResource::collection($payments)->additional([

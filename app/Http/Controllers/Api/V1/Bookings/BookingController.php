@@ -47,15 +47,14 @@ class BookingController extends Controller
             ->allowedFilters(...[
                 'status',
                 'guest_id',
-                AllowedFilter::callback('check_in_date', function ($query, $value) 
-            ->allowedIncludes(['guest', 'room', 'hotel', 'payments']){
+                AllowedFilter::callback('check_in_date', function ($query, $value) {
                     $query->where('check_in_date', '>=', $value);
                 }),
                 AllowedFilter::callback('check_out_date', function ($query, $value) {
                     $query->where('check_out_date', '<=', $value);
                 }),
             ])
-            ->with(['guest', 'rooms.roomType', 'services'])
+            ->allowedIncludes('guest', 'room', 'rooms', 'rooms.roomType', 'hotel', 'payments', 'services')
             ->paginate($request->query('per_page', 15));
 
         return BookingResource::collection($bookings)->additional([
