@@ -52,7 +52,7 @@ class HousekeepingController extends Controller
                 'room_id',
             ])
             
-            ->allowedIncludes(['room', 'assignedTo'])->with(['room', 'assignedTo'])
+            ->allowedIncludes('room', 'assignedTo')->with(['room', 'assignedTo'])
             ->paginate($request->query('per_page', 15));
 
         return HousekeepingTaskResource::collection($tasks)->additional([

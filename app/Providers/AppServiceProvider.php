@@ -42,6 +42,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            return $user->isSuperAdmin() ? true : null;
+        });
+
         ResetPassword::createUrlUsing(function ($user, string $token) {
             return config('frontend.url').'/reset-password?token='.$token.'&email='.urlencode($user->email);
         });
