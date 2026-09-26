@@ -10,6 +10,8 @@ use Illuminate\Notifications\Notifiable;
 
 class Guest extends Model
 {
+    use \Stancl\Tenancy\Database\Concerns\BelongsToTenant;
+
     use HasFactory;
     use LogsAuditTrail;
     use Notifiable;
