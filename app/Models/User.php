@@ -32,6 +32,8 @@ use Spatie\Permission\Traits\HasRoles;
 ])]
 class User extends Authenticatable
 {
+    use \Stancl\Tenancy\Database\Concerns\BelongsToTenant;
+
     use HasApiTokens;
 
     /** @use HasFactory<UserFactory> */
