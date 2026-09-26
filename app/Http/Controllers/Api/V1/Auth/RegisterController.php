@@ -59,7 +59,7 @@ class RegisterController extends Controller
             // The role might need to be created if it doesn't exist for this tenant,
             // or if roles are global, we just assign it.
             // Assuming Spatie permissions handles this.
-            // $user->assignRole('Super Admin'); // Uncomment or handle roles based on your setup
+            $user->assignRole('super_admin');
 
             $token = $user->createToken('hotelia-pms')->plainTextToken;
 
