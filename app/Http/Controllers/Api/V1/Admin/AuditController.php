@@ -30,6 +30,10 @@ class AuditController extends Controller
     public function index()
     {
         $logs = QueryBuilder::for(Activity::class)
+            ->whereHas('causer', function ($query) {
+                // Ensure we only show activity logs performed by users in the current tenant
+                $query->where('tenant_id', tenant('id'));
+            })
             ->with('causer', 'subject')
             ->allowedFilters(
                 'log_name',
