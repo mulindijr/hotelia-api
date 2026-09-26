@@ -7,18 +7,20 @@ Route::prefix('v1')
     ->scopeBindings()
     ->group(function () {
         require base_path('routes/api/auth.php');
-        require base_path('routes/api/security.php');
-        require base_path('routes/api/admin.php');
-        require base_path('routes/api/hotels.php');
-        require base_path('routes/api/rooms.php');
-        require base_path('routes/api/guests.php');
-        require base_path('routes/api/services.php');
-        require base_path('routes/api/housekeeping.php');
-        require base_path('routes/api/maintenance.php');
-        require base_path('routes/api/bookings.php');
-        require base_path('routes/api/notifications.php');
-        require base_path('routes/api/billing.php');
-        require base_path('routes/api/users.php');
-        require base_path('routes/api/reports.php');
-        require base_path('routes/api/pricing.php');
+        Route::middleware(['auth:sanctum', 'tenancy'])->group(function () {
+            require base_path('routes/api/security.php');
+            require base_path('routes/api/admin.php');
+            require base_path('routes/api/hotels.php');
+            require base_path('routes/api/rooms.php');
+            require base_path('routes/api/guests.php');
+            require base_path('routes/api/services.php');
+            require base_path('routes/api/housekeeping.php');
+            require base_path('routes/api/maintenance.php');
+            require base_path('routes/api/bookings.php');
+            require base_path('routes/api/notifications.php');
+            require base_path('routes/api/billing.php');
+            require base_path('routes/api/users.php');
+            require base_path('routes/api/reports.php');
+            require base_path('routes/api/pricing.php');
+        });
     });
