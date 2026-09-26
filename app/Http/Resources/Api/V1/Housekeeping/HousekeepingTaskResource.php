@@ -18,7 +18,8 @@ class HousekeepingTaskResource extends JsonResource
         return [
             'id' => $this->id,
             'room_id' => $this->room_id,
-            'assigned_to' => $this->assigned_to ? (int) $this->assigned_to : null,
+                        'assigned_to' => $this->assigned_to ? (int) $this->assigned_to : null,
+            'assigned_user' => new \App\Http\Resources\Api\V1\Users\UserResource($this->whenLoaded('assignedTo')),
             'status' => $this->status,
             'scheduled_at' => $this->scheduled_at?->toISOString(),
             'completed_at' => $this->completed_at?->toISOString(),
