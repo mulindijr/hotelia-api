@@ -28,12 +28,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         
-        // Register Tenancy
+        // Register Middleware Aliases
         $middleware->alias([
             'tenancy' => \App\Http\Middleware\InitializeTenancyByAuthUser::class,
-        ]);
-        // Register Spatie Permission Middleware Aliases
-        $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
