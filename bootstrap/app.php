@@ -27,6 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetHotelPermissionsContext::class,
         ]);
 
+        
+        // Register Tenancy
+        $middleware->alias([
+            'tenancy' => \App\Http\Middleware\InitializeTenancyByAuthUser::class,
+        ]);
         // Register Spatie Permission Middleware Aliases
         $middleware->alias([
             'role' => RoleMiddleware::class,
