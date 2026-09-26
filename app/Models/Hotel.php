@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Hotel extends Model
 {
+    use \Stancl\Tenancy\Database\Concerns\BelongsToTenant;
+
     use HasFactory;
     use LogsAuditTrail;
     use SoftDeletes;
