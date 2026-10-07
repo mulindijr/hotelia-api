@@ -4,6 +4,7 @@ use App\Constants\Permissions;
 use App\Http\Controllers\Api\V1\Hotels\HotelController;
 use App\Http\Controllers\Api\V1\Hotels\HotelSettingController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\Billing\HotelPaymentController;
 
 Route::middleware(['auth:sanctum'])->prefix('hotels')->group(function () {
 
@@ -25,4 +26,7 @@ Route::middleware(['auth:sanctum'])->prefix('hotels')->group(function () {
     Route::match(['put', 'patch'], '/{hotel}/settings', [HotelSettingController::class, 'update'])
         ->middleware('permission:'.Permissions::UPDATE_HOTELS)
         ->name('hotels.settings.update');
+
+    // Hotel-wide payments
+    Route::get('/{hotel}/payments', [HotelPaymentController::class, 'index'])->name('hotels.payments.index');
 });

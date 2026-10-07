@@ -4,6 +4,7 @@ namespace App\Http\Requests\Api\V1\Hotels;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class UpdateHotelRequest extends FormRequest
@@ -14,6 +15,18 @@ class UpdateHotelRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (! $this->filled('slug') && $this->filled('name')) {
+            $this->merge([
+                'slug' => Str::slug($this->input('name')),
+            ]);
+        }
     }
 
     /**
