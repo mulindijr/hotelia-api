@@ -28,6 +28,7 @@ class UpdateBookingRequest extends FormRequest
         $hotelId = $this->route('hotel')?->id;
 
         return [
+            'status' => ['sometimes', 'string', Rule::in([BookingStatus::PENDING, BookingStatus::CONFIRMED])],
             'guest_id' => [
                 'sometimes',
                 'integer',
