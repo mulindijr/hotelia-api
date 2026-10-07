@@ -36,6 +36,11 @@ class RoomType extends Model
         return $this->hasMany(Room::class);
     }
 
+    public function images()
+    {
+        return $this->hasMany(RoomTypeImage::class)->orderByDesc('is_primary')->latest();
+    }
+
     public function amenities()
     {
         return $this->belongsToMany(Amenity::class, 'room_type_amenity');
