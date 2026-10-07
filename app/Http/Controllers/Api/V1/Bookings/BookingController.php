@@ -53,7 +53,17 @@ class BookingController extends Controller
                 AllowedFilter::callback('check_out_date', function ($query, $value) {
                     $query->where('check_out_date', '<=', $value);
                 }),
+                AllowedFilter::callback('search', function ($query, $value) {
+                    $query->where(function($q) use ($value) {
+                        $q->where('booking_reference', 'like', "%{$value}%")
+                          ->orWhereHas('guest', function($guestQuery) use ($value) {
+                              $guestQuery->where('first_name', 'like', "%{$value}%")
+                                        ->orWhere('last_name', 'like', "%{$value}%");
+                          });
+                    });
+                }),
             ])
+            ->allowedSorts('booking_reference', 'check_in_date', 'check_out_date', 'total_amount', 'status', 'created_at')
             ->allowedIncludes('guest', 'room', 'rooms', 'rooms.roomType', 'hotel', 'payments', 'services')
             ->paginate($request->query('per_page', 15));
 
