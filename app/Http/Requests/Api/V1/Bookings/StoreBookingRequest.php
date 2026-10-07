@@ -29,10 +29,20 @@ class StoreBookingRequest extends FormRequest
 
         return [
             'guest_id' => [
-                'required',
+                'required_without:guest',
+                'nullable',
                 'integer',
                 Rule::exists('guests', 'id'),
             ],
+            'guest' => ['required_without:guest_id', 'array'],
+            'guest.first_name' => ['required_with:guest', 'string', 'max:255'],
+            'guest.last_name' => ['required_with:guest', 'string', 'max:255'],
+            'guest.email' => ['nullable', 'email', 'max:255'],
+            'guest.phone' => ['nullable', 'string', 'max:20'],
+            'initial_payment' => ['sometimes', 'array'],
+            'initial_payment.amount' => ['required_with:initial_payment', 'numeric', 'min:0'],
+            'initial_payment.payment_method' => ['required_with:initial_payment', 'string'],
+            'check_in_now' => ['sometimes', 'boolean'],
             'check_in_date' => ['required', 'date', 'after_or_equal:today'],
             'check_out_date' => ['required', 'date', 'after:check_in_date'],
             'adults' => ['sometimes', 'integer', 'min:1'],

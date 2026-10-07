@@ -14,6 +14,7 @@ class HotelSettingService
      */
     public function getSettings(Hotel $hotel): HotelSetting
     {
+        Cache::forget("hotel:{$hotel->id}:settings"); // Temporary Dev Fix for Incomplete_Class
         return Cache::remember("hotel:{$hotel->id}:settings", 86400, function () use ($hotel) {
             return $hotel->settings ?: $hotel->settings()->create([
                 'currency' => 'KES',
