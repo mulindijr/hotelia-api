@@ -31,6 +31,7 @@ class BookingService
      */
     public function create(Hotel $hotel, array $data): Booking
     {
+        \Illuminate\Support\Facades\Log::info('Walk-in Check-in Request Payload', $data);
         return DB::transaction(function () use ($hotel, $data) {
             $roomIds = $data['rooms'];
             $checkInDate = $data['check_in_date'];
@@ -182,6 +183,23 @@ class BookingService
 
             event(new BookingCreated($booking));
 
+            // Handle initial payment
+            if (isset($data['initial_payment'])) {
+                app(BillingService::class)->logPayment($booking, $data['initial_payment']);
+            }
+
+            // Handle immediate check-in for walk-ins
+            if (!empty($data['check_in_now'])) {
+                $booking->update([
+                    'status' => BookingStatus::CHECKED_IN,
+                    'actual_check_in_at' => now(),
+                ]);
+                foreach ($rooms as $room) {
+                    $room->update(['status' => RoomStatus::OCCUPIED]);
+                }
+                event(new BookingCheckedIn($booking));
+            }
+
             return $booking->load(['guest', 'rooms', 'services']);
         });
     }
@@ -293,24 +311,7 @@ class BookingService
                 }
             }
 
-            // Handle initial payment
-            if (isset($data['initial_payment'])) {
-                app(BillingService::class)->logPayment($booking, $data['initial_payment']);
-            }
-
-            // Handle immediate check-in for walk-ins
-            if (!empty($data['check_in_now'])) {
-                $booking->update([
-                    'status' => BookingStatus::CHECKED_IN,
-                    'actual_check_in_at' => now(),
-                ]);
-                foreach ($rooms as $room) {
-                    $room->update(['status' => RoomStatus::OCCUPIED]);
-                }
-                event(new BookingCheckedIn($booking));
-            } else {
-                event(new BookingUpdated($booking));
-            }
+            event(new BookingUpdated($booking));
 
             return $booking->fresh()->load(['guest', 'rooms', 'services']);
         });
