@@ -37,7 +37,7 @@ class StoreBookingRequest extends FormRequest
             'guest' => ['required_without:guest_id', 'array'],
             'guest.first_name' => ['required_with:guest', 'string', 'max:255'],
             'guest.last_name' => ['required_with:guest', 'string', 'max:255'],
-            'guest.email' => ['nullable', 'email', 'max:255'],
+            'guest.email' => ['required_with:guest', 'email', 'max:255'],
             'guest.phone' => ['nullable', 'string', 'max:20'],
             'initial_payment' => ['sometimes', 'array'],
             'initial_payment.amount' => ['required_with:initial_payment', 'numeric', 'min:0'],
