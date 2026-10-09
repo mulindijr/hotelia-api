@@ -132,7 +132,7 @@ class BookingController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Booking Retrieved Successfully.',
-            'data' => new BookingResource($booking->load(['guest', 'rooms.roomType', 'services'])),
+            'data' => new BookingResource($booking->load(['guest', 'rooms.roomType', 'services', 'payments'])),
         ]);
     }
 
@@ -185,7 +185,7 @@ class BookingController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Booking Cancelled Successfully.',
-            'data' => new BookingResource($cancelledBooking->load(['guest', 'rooms.roomType', 'services'])),
+            'data' => new BookingResource($cancelledBooking->load(['guest', 'rooms.roomType', 'services', 'payments'])),
         ]);
     }
 
@@ -211,7 +211,7 @@ class BookingController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Booking Checked In Successfully.',
-            'data' => new BookingResource($checkedInBooking->load(['guest', 'rooms.roomType', 'services'])),
+            'data' => new BookingResource($checkedInBooking->load(['guest', 'rooms.roomType', 'services', 'payments'])),
         ]);
     }
 
@@ -237,7 +237,7 @@ class BookingController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Booking Checked Out Successfully.',
-            'data' => new BookingResource($checkedOutBooking->load(['guest', 'rooms.roomType', 'services'])),
+            'data' => new BookingResource($checkedOutBooking->load(['guest', 'rooms.roomType', 'services', 'payments'])),
         ]);
     }
 
@@ -263,7 +263,7 @@ class BookingController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Booking Marked as No-Show Successfully.',
-            'data' => new BookingResource($noShowBooking->load(['guest', 'rooms.roomType', 'services'])),
+            'data' => new BookingResource($noShowBooking->load(['guest', 'rooms.roomType', 'services', 'payments'])),
         ]);
     }
 }

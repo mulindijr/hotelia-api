@@ -5,6 +5,7 @@ namespace App\Http\Resources\Api\V1\Bookings;
 use App\Http\Resources\Api\V1\Guests\GuestResource;
 use App\Http\Resources\Api\V1\Rooms\RoomResource;
 use App\Http\Resources\Api\V1\Services\ServiceResource;
+use App\Http\Resources\Api\V1\Billing\PaymentResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -37,6 +38,7 @@ class BookingResource extends JsonResource
             'guest' => new GuestResource($this->whenLoaded('guest')),
             'rooms' => RoomResource::collection($this->whenLoaded('rooms')),
             'services' => ServiceResource::collection($this->whenLoaded('services')),
+            'payments' => PaymentResource::collection($this->whenLoaded('payments')),
         ];
     }
 }

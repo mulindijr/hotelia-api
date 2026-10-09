@@ -23,6 +23,12 @@ class ServiceResource extends JsonResource
             'is_active' => (bool) $this->is_active,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
+            'pivot' => $this->when(isset($this->pivot), function () {
+                return [
+                    'quantity' => (int) $this->pivot->quantity,
+                    'price' => (float) $this->pivot->price,
+                ];
+            }),
         ];
     }
 }
