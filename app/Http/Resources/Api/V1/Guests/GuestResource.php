@@ -22,6 +22,7 @@ class GuestResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'nationality' => $this->nationality,
+            'country' => $this->nationality,
             'national_id' => $this->national_id,
             'passport_number' => $this->passport_number,
             'created_at' => $this->created_at?->toISOString(),

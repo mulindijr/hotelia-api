@@ -223,14 +223,25 @@ class GuestController extends Controller
 
         $user = $request->user();
 
-        $query = $guest->bookings()->with(['guest', 'rooms.roomType', 'services']);
+        $query = $guest->bookings()->with(['guest', 'hotel.settings', 'rooms.roomType', 'services', 'payments', 'invoice']);
 
-        if (! $user->hasRole('super_admin')) {
+        $hotelId = $request->query('hotel_id') ?? $request->header('X-Hotel-ID');
+
+        if ($hotelId) {
+            $hotelId = (int) $hotelId;
+            if (! $user->isSuperAdmin()) {
+                $userHotelIds = $user->hotels()->pluck('hotels.id');
+                if (! $userHotelIds->contains($hotelId)) {
+                    abort(403, 'Unauthorized access to this hotel.');
+                }
+            }
+            $query->where('hotel_id', $hotelId);
+        } elseif (! $user->isSuperAdmin()) {
             $hotelIds = $user->hotels()->pluck('hotels.id');
             $query->whereIn('hotel_id', $hotelIds);
         }
 
-        $bookings = $query->get();
+        $bookings = $query->latest('created_at')->get();
 
         return response()->json([
             'success' => true,
