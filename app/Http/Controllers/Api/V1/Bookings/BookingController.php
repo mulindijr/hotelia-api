@@ -129,10 +129,13 @@ class BookingController extends Controller
     {
         $this->authorize('view', [$booking, $hotel]);
 
+        $invoice = app(\App\Services\Billing\BillingService::class)->getOrGenerateInvoice($booking);
+        $booking->setRelation('invoice', $invoice);
+
         return response()->json([
             'success' => true,
             'message' => 'Booking Retrieved Successfully.',
-            'data' => new BookingResource($booking->load(['guest', 'rooms.roomType', 'services', 'payments'])),
+            'data' => new BookingResource($booking->load(['guest', 'rooms.roomType', 'services', 'payments', 'hotel.settings'])),
         ]);
     }
 
