@@ -4,6 +4,7 @@ namespace App\Http\Requests\Api\V1\Bookings;
 
 use App\Constants\BookingStatus;
 use App\Models\Booking;
+use Carbon\Carbon;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -26,16 +27,22 @@ class UpdateBookingRequest extends FormRequest
     public function rules(): array
     {
         $hotelId = $this->route('hotel')?->id;
+        $booking = $this->route('booking');
+
+        $checkInRules = ['sometimes', 'date'];
+        if ($this->has('check_in_date') && (! $booking || $this->input('check_in_date') !== $booking->check_in_date?->toDateString())) {
+            $checkInRules[] = 'after_or_equal:today';
+        }
 
         return [
-            'status' => ['sometimes', 'string', Rule::in([BookingStatus::PENDING, BookingStatus::CONFIRMED])],
+            'status' => ['sometimes', 'string', Rule::in([BookingStatus::PENDING, BookingStatus::CONFIRMED, BookingStatus::CHECKED_IN])],
             'guest_id' => [
                 'sometimes',
                 'integer',
                 Rule::exists('guests', 'id'),
             ],
-            'check_in_date' => ['sometimes', 'date', 'after_or_equal:today'],
-            'check_out_date' => ['sometimes', 'date', 'after:check_in_date'],
+            'check_in_date' => $checkInRules,
+            'check_out_date' => ['sometimes', 'date'],
             'adults' => ['sometimes', 'integer', 'min:1'],
             'children' => ['sometimes', 'integer', 'min:0'],
             'rooms' => ['sometimes', 'array', 'min:1'],
@@ -65,17 +72,23 @@ class UpdateBookingRequest extends FormRequest
                 return;
             }
 
-            $hotel = $this->route('hotel');
-            if ($hotel?->settings?->allow_overbooking) {
-                return;
-            }
-
-            // Only run overlap check if rooms and dates are provided
             $booking = $this->route('booking');
             $bookingId = $booking?->id;
 
             $checkIn = $this->input('check_in_date') ?? $booking?->check_in_date?->toDateString();
             $checkOut = $this->input('check_out_date') ?? $booking?->check_out_date?->toDateString();
+
+            if ($checkIn && $checkOut) {
+                if (Carbon::parse($checkOut)->lte(Carbon::parse($checkIn))) {
+                    $validator->errors()->add('check_out_date', 'The check out date must be after the check in date.');
+                    return;
+                }
+            }
+
+            $hotel = $this->route('hotel');
+            if ($hotel?->settings?->allow_overbooking) {
+                return;
+            }
 
             // If rooms array is not provided, load the current booking's room IDs
             $roomIds = $this->input('rooms');
@@ -88,7 +101,8 @@ class UpdateBookingRequest extends FormRequest
             }
 
             $conflictingBookings = Booking::where('id', '!=', $bookingId)
-                ->where('status', '!=', BookingStatus::CANCELLED)
+                ->where('hotel_id', $hotel?->id ?? $booking?->hotel_id)
+                ->whereNotIn('status', [BookingStatus::CANCELLED, BookingStatus::NO_SHOW])
                 ->whereHas('rooms', function ($query) use ($roomIds) {
                     $query->whereIn('rooms.id', $roomIds);
                 })
