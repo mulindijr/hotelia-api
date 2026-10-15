@@ -128,10 +128,10 @@ class InvoiceController extends Controller
         $invoice = $this->billingService->getOrGenerateInvoice($booking);
         $guest = $booking->guest;
 
-        if (! $guest || ! $guest->email) {
+        if (! $guest || ! $guest->email || ! filter_var($guest->email, FILTER_VALIDATE_EMAIL)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Guest has no email address configured.',
+                'message' => 'Guest does not have a valid email address configured.',
             ], 422);
         }
 
