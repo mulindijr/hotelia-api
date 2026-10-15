@@ -10,9 +10,9 @@ use Illuminate\Http\Response;
 class PdfService
 {
     /**
-     * Render guest invoice as PDF response.
+     * Generate raw binary PDF output for an invoice.
      */
-    public function renderInvoicePdf(Invoice $invoice): Response
+    public function generateInvoicePdfOutput(Invoice $invoice): string
     {
         $invoice->loadMissing([
             'booking.hotel.settings',
@@ -35,6 +35,13 @@ class PdfService
 
         $balanceDue = max(0, (float) $invoice->total_amount - (float) $totalPaid);
 
+        // Derive tax rate accurately from invoice, hotel settings, or calculate from subtotal & tax_amount
+        $taxRate = (float) (
+            $invoice->tax_rate 
+            ?? $settings?->tax_rate 
+            ?? ($invoice->subtotal > 0 ? round(($invoice->tax_amount / $invoice->subtotal) * 100, 2) : 0)
+        );
+
         $pdf = Pdf::loadView('pdf.invoice', [
             'invoice' => $invoice,
             'hotel' => $hotel,
@@ -43,17 +50,31 @@ class PdfService
             'currency' => $currency,
             'totalPaid' => $totalPaid,
             'balanceDue' => $balanceDue,
+            'taxRate' => $taxRate,
         ]);
 
-        $filename = "invoice_{$invoice->invoice_number}.pdf";
-
-        return $pdf->download($filename);
+        return $pdf->output();
     }
 
     /**
-     * Render payment receipt as PDF response.
+     * Render guest invoice as PDF response.
      */
-    public function renderPaymentReceiptPdf(Payment $payment): Response
+    public function renderInvoicePdf(Invoice $invoice): Response
+    {
+        $filename = "invoice_{$invoice->invoice_number}.pdf";
+        $output = $this->generateInvoicePdfOutput($invoice);
+
+        return response($output, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Length' => strlen($output),
+        ]);
+    }
+
+    /**
+     * Generate raw binary PDF output for a payment receipt.
+     */
+    public function generatePaymentReceiptPdfOutput(Payment $payment): string
     {
         $payment->loadMissing([
             'booking.guest',
@@ -75,8 +96,21 @@ class PdfService
             'currency' => $currency,
         ]);
 
-        $filename = "receipt_#{$payment->id}.pdf";
+        return $pdf->output();
+    }
 
-        return $pdf->download($filename);
+    /**
+     * Render payment receipt as PDF response.
+     */
+    public function renderPaymentReceiptPdf(Payment $payment): Response
+    {
+        $filename = "receipt_#{$payment->id}.pdf";
+        $output = $this->generatePaymentReceiptPdfOutput($payment);
+
+        return response($output, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Length' => strlen($output),
+        ]);
     }
 }

@@ -14,6 +14,7 @@ class InvoiceResource extends JsonResource
             'invoice_number' => $this->invoice_number,
             'booking_id' => $this->booking_id,
             'subtotal' => (float) $this->subtotal,
+            'tax_rate' => (float) ($this->tax_rate ?? 0),
             'tax_amount' => (float) $this->tax_amount,
             'total_amount' => (float) $this->total_amount,
             'status' => $this->status,

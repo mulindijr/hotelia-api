@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum'])->prefix('hotels/{hotel}/bookings/{booking}')->scopeBindings()->group(function () {
     Route::get('/invoice', [InvoiceController::class, 'show'])->name('bookings.invoice.show');
     Route::get('/invoice/pdf', [InvoiceController::class, 'downloadPdf'])->name('bookings.invoice.pdf');
+    Route::get('/invoice/download', [InvoiceController::class, 'downloadPdf'])->name('bookings.invoice.download');
     Route::post('/invoice/regenerate', [InvoiceController::class, 'regenerate'])->name('bookings.invoice.regenerate');
+    Route::post('/invoice/send', [InvoiceController::class, 'sendEmail'])->name('bookings.invoice.send');
     Route::get('/payments', [PaymentController::class, 'index'])->name('bookings.payments.index');
     Route::post('/payments', [PaymentController::class, 'store'])->name('bookings.payments.store');
     Route::get('/payments/{payment}/receipt/pdf', [PaymentController::class, 'downloadReceiptPdf'])->name('bookings.payments.receipt.pdf');

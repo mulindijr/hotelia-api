@@ -8,6 +8,8 @@ use App\Models\Booking;
 use App\Models\Hotel;
 use App\Services\Billing\BillingService;
 use App\Services\Pdf\PdfService;
+use App\Mail\Billing\InvoiceGeneratedMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -100,6 +102,44 @@ class InvoiceController extends Controller
             'success' => true,
             'message' => 'Invoice Regenerated Successfully.',
             'data' => new InvoiceResource($invoice),
+        ]);
+    }
+
+    #[OA\Post(
+        path: '/api/v1/hotels/{hotel}/bookings/{booking}/invoice/send',
+        summary: 'Send invoice PDF via email to guest',
+        tags: ['Billing'],
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(name: 'hotel', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'booking', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Invoice email sent successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 404, description: 'Booking or Hotel not found'),
+            new OA\Response(response: 422, description: 'Guest has no email address'),
+        ]
+    )]
+    public function sendEmail(Hotel $hotel, Booking $booking): JsonResponse
+    {
+        $this->authorize('view', [$booking, $hotel]);
+
+        $invoice = $this->billingService->getOrGenerateInvoice($booking);
+        $guest = $booking->guest;
+
+        if (! $guest || ! $guest->email) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Guest has no email address configured.',
+            ], 422);
+        }
+
+        Mail::to($guest->email)->send(new InvoiceGeneratedMail($invoice));
+
+        return response()->json([
+            'success' => true,
+            'message' => "Invoice email sent successfully to {$guest->email}.",
         ]);
     }
 }

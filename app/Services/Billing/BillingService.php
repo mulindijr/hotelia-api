@@ -21,7 +21,11 @@ class BillingService
     {
         $invoice = $booking->invoices()->first();
 
-        if (! $invoice) {
+        if (! $invoice 
+            || (float) $invoice->subtotal !== (float) $booking->total_amount 
+            || $invoice->items()->count() === 0
+            || ($invoice->tax_amount > 0 && (float) ($invoice->tax_rate ?? 0) == 0.0)
+        ) {
             $invoice = $this->regenerateInvoice($booking);
         }
 
@@ -129,6 +133,7 @@ class BillingService
                     'invoice_number' => $invoiceNumber,
                     'booking_id' => $booking->id,
                     'subtotal' => $subtotal,
+                    'tax_rate' => $taxRate,
                     'tax_amount' => $taxAmount,
                     'total_amount' => $totalAmount,
                     'status' => 'unpaid',
@@ -136,6 +141,7 @@ class BillingService
             } else {
                 $invoice->update([
                     'subtotal' => $subtotal,
+                    'tax_rate' => $taxRate,
                     'tax_amount' => $taxAmount,
                     'total_amount' => $totalAmount,
                 ]);

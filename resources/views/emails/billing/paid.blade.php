@@ -13,9 +13,7 @@ This email confirms that your invoice has been fully paid. Thank you!
 
 We hope you enjoyed your stay at {{ $hotel->name }}. We look forward to hosting you again!
 
-@component('mail::button', ['url' => config('app.url') . '/bookings/' . $booking->id . '/invoice'])
-View Invoice Details
-@endcomponent
+Please find your paid invoice attached to this email as a PDF document.
 
 Regards,
 {{ $hotel->name }} Management

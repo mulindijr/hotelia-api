@@ -17,6 +17,7 @@ class Invoice extends Model
         'invoice_number',
         'booking_id',
         'subtotal',
+        'tax_rate',
         'tax_amount',
         'total_amount',
         'status',
@@ -24,6 +25,7 @@ class Invoice extends Model
 
     protected $casts = [
         'subtotal' => 'decimal:2',
+        'tax_rate' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
     ];

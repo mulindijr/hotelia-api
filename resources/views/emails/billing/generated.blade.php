@@ -15,14 +15,12 @@ An invoice has been generated or updated for your stay at {{ $hotel->name }}.
 
 ---
 * **Subtotal:** {{ number_format($invoice->subtotal, 2) }} {{ $hotel->settings?->currency ?? 'KES' }}
-* **Tax Amount ({{ $hotel->settings?->tax_rate ?? 0 }}%):** {{ number_format($invoice->tax_amount, 2) }} {{ $hotel->settings?->currency ?? 'KES' }}
+* **Tax Amount ({{ number_format($invoice->tax_rate ?? $hotel->settings?->tax_rate ?? 0, 1) }}%):** {{ number_format($invoice->tax_amount, 2) }} {{ $hotel->settings?->currency ?? 'KES' }}
 * **Total Amount:** **{{ number_format($invoice->total_amount, 2) }} {{ $hotel->settings?->currency ?? 'KES' }}**
 
-Please arrange for payment at your earliest convenience.
+Please find your official invoice attached to this email as a PDF document.
 
-@component('mail::button', ['url' => config('app.url') . '/bookings/' . $booking->id . '/invoice'])
-View Invoice Details
-@endcomponent
+Please arrange for payment at your earliest convenience.
 
 Regards,
 {{ $hotel->name }} Management

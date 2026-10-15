@@ -186,7 +186,7 @@
                 <td class="text-right">{{ $currency }} {{ number_format($invoice->subtotal, 2) }}</td>
             </tr>
             <tr>
-                <td>Tax ({{ number_format($invoice->tax_rate ?? 0, 1) }}%):</td>
+                <td>Tax ({{ number_format($taxRate ?? $invoice->tax_rate ?? 0, 1) }}%):</td>
                 <td class="text-right">{{ $currency }} {{ number_format($invoice->tax_amount, 2) }}</td>
             </tr>
             <tr class="grand-total">
