@@ -62,6 +62,18 @@ class BookingController extends Controller
                           });
                     });
                 }),
+                AllowedFilter::callback('queue', function ($query, $value) {
+                    $today = \Carbon\Carbon::today()->toDateString();
+                    if ($value === 'arrivals_today') {
+                        $query->whereDate('check_in_date', $today)
+                              ->whereIn('status', ['confirmed', 'pending']);
+                    } elseif ($value === 'departures_today') {
+                        $query->whereDate('check_out_date', $today)
+                              ->where('status', 'checked_in');
+                    } elseif ($value === 'in_house') {
+                        $query->where('status', 'checked_in');
+                    }
+                }),
             ])
             ->allowedSorts('booking_reference', 'check_in_date', 'check_out_date', 'total_amount', 'status', 'created_at')
             ->allowedIncludes('guest', 'room', 'rooms', 'rooms.roomType', 'hotel', 'payments', 'services')

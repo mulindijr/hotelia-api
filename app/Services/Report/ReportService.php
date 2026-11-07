@@ -46,13 +46,19 @@ class ReportService
                 ->whereIn('status', ['open', 'in_progress'])
                 ->count();
 
-            // 5. Active checked-in bookings
+            // 5. Active checked-in bookings, arrivals, and departures
+            $today = Carbon::today()->toDateString();
+            $todayArrivals = $hotel->bookings()->whereDate('check_in_date', $today)->whereIn('status', ['confirmed', 'pending'])->count();
+            $todayDepartures = $hotel->bookings()->whereDate('check_out_date', $today)->where('status', 'checked_in')->count();
             $activeBookingsCount = $hotel->bookings()->where('status', 'checked_in')->count();
 
             return [
                 'total_rooms' => $totalRooms,
                 'occupied_rooms' => $occupiedCount,
                 'occupancy_rate' => $occupancyRate,
+                'today_arrivals' => $todayArrivals,
+                'today_departures' => $todayDepartures,
+                'in_house_count' => $activeBookingsCount,
                 'room_statuses' => [
                     'available' => $roomStatuses['available'] ?? 0,
                     'occupied' => $roomStatuses['occupied'] ?? 0,
