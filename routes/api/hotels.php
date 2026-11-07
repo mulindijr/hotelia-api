@@ -40,4 +40,5 @@ Route::middleware(['auth:sanctum'])->prefix('hotels')->group(function () {
         ->middleware('permission:'.Permissions::UPDATE_HOTELS)->name('hotels.room-types.images.destroy');
     // Hotel-wide payments
     Route::get('/{hotel}/payments', [HotelPaymentController::class, 'index'])->name('hotels.payments.index');
+    Route::get('/{hotel}/payments/{payment}/receipt/pdf', [HotelPaymentController::class, 'downloadReceiptPdf'])->name('hotels.payments.receipt.pdf');
 });

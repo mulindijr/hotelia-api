@@ -12,11 +12,15 @@ class GetAvailabilityRequest extends FormRequest
         $hotel = $this->route('hotel');
         $user = $this->user();
 
-        if ($user->hasRole('super_admin')) {
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin() || $user->hasRole('super_admin')) {
             return true;
         }
 
-        return $user->belongsToHotel($hotel) && $user->hasPermissionTo(Permissions::VIEW_AVAILABILITY);
+        return $user->belongsToHotel($hotel) && ($user->can(Permissions::VIEW_AVAILABILITY) || $user->hasPermissionTo(Permissions::VIEW_AVAILABILITY));
     }
 
     public function rules(): array
